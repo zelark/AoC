@@ -9,9 +9,9 @@
 
 (defn parse-input [input]
   (map (fn [xs]
-          (->> (re-seq #"\d+" xs)
-               (transduce (map parse-long) +)))
-        (str/split input #"\R\R")))
+         (->> (re-seq #"\d+" xs)
+              (transduce (map parse-long) +)))
+       (str/split input #"\R\R")))
 
 ;; part 1
 (->> (parse-input input)

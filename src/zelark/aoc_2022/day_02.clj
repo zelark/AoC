@@ -15,48 +15,40 @@
   {"A" :rock "B" :paper "C" :scissors
    "X" :rock "Y" :paper "Z" :scissors})
 
-(defn score [choice]
-  (case choice
-    ;; Draw
-    [:rock :rock]         [(+ 1 3) (+ 1 3)]
-    [:paper :paper]       [(+ 2 3) (+ 2 3)]
-    [:scissors :scissors] [(+ 3 3) (+ 3 3)]
-    ;; First player wins 
-    [:rock :scissors]     [(+ 1 6) (+ 0 3)]
-    [:paper :rock]        [(+ 2 6) (+ 0 1)]
-    [:scissors :paper]    [(+ 3 6) (+ 0 2)]
-    ;; Second player wins
-    [:scissors :rock]     [(+ 0 3) (+ 1 6)]
-    [:rock :paper]        [(+ 0 1) (+ 2 6)]
-    [:paper :scissors]    [(+ 0 2) (+ 3 6)]))
-
-(defn my-total-score [lines]
-  (->> lines
-       (map (comp second score))
-       (reduce +)))
+(defn score [state shape]
+  (+ (get {:rock 1 :paper 2 :scissors 3} shape)
+     (get {:loss 0 :draw 3 :win 6} state)))
 
 ;; part 1
+(defn score-p1 [choice]
+  (case choice
+    [:paper    :rock]     (score :loss :rock)
+    [:scissors :paper]    (score :loss :paper)
+    [:rock     :scissors] (score :loss :scissors)
+    [:rock     :rock]     (score :draw :rock)
+    [:paper    :paper]    (score :draw :paper)
+    [:scissors :scissors] (score :draw :scissors)
+    [:scissors :rock]     (score :win :rock)
+    [:rock     :paper]    (score :win :paper)
+    [:paper    :scissors] (score :win :scissors)))
+
 (->> (parse-input input)
      (map #(map letter->shape %))
-     (my-total-score)) ; 12794
-
-(defn rewrite-line [[a b]]
-  (let [shape (letter->shape a)]
-    (case b
-      ;; X means you need to lose
-      "X" (cond
-            (= shape :rock)     [shape :scissors]
-            (= shape :paper)    [shape :rock]
-            (= shape :scissors) [shape :paper])
-      ;; Y means you need to end the round in a draw
-      "Y" [shape shape]
-      ;; and Z means you need to win.
-      "Z" (cond
-            (= shape :rock)     [shape :paper]
-            (= shape :paper)    [shape :scissors]
-            (= shape :scissors) [shape :rock]))))
+     (transduce (map score-p1) +)) ; 12794
 
 ;; part 2
+(defn score-p2 [[a b]]
+  (let [shape (letter->shape a)]
+    (case b
+      "X" (case shape
+            :rock     (score :loss :scissors)
+            :paper    (score :loss :rock)
+            :scissors (score :loss :paper))
+      "Y" (score :draw shape)
+      "Z" (case shape
+            :rock     (score :win :paper)
+            :paper    (score :win :scissors)
+            :scissors (score :win :rock)))))
+
 (->> (parse-input input)
-     (map rewrite-line)
-     (my-total-score)) ; 14979
+     (transduce (map score-p2) +)) ; 14979

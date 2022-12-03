@@ -1,6 +1,7 @@
 (ns zelark.aoc-2022.day-02
   (:require [zelark.aoc.core :as aoc]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.set :as set]))
 
 ;; --- Day 2: Rock Paper Scissors ---
 ;; https://adventofcode.com/2022/day/2
@@ -15,21 +16,27 @@
   {\A :rock \B :paper \C :scissors
    \X :rock \Y :paper \Z :scissors})
 
-(defn score [state shape]
-  (+ (get {:rock 1 :paper 2 :scissors 3} shape)
-     (get {:loss 0 :draw 3 :win 6} state)))
+(def lose {:rock     :scissors
+           :paper    :rock
+           :scissors :paper})
 
-(defn state [[a b :as choice]]
+(def win (set/map-invert lose))
+
+(defn score [outcome shape]
+  (+ (get {:rock 1 :paper 2 :scissors 3} shape)
+     (get {:loss 0 :draw 3 :win 6} outcome)))
+
+(defn outcome [a b]
   (cond
-    (= a b)                       :draw
-    (= choice [:scissors :rock])  :win
-    (= choice [:rock :paper])     :win
-    (= choice [:paper :scissors]) :win
-    :else                         :loss))
+    (= a b)                      :draw
+    (= [a b] [:rock :scissors])  :win
+    (= [a b] [:paper :rock])     :win
+    (= [a b] [:scissors :paper]) :win
+    :else                        :loss))
 
 ;; part 1
-(defn score-p1 [[_ b :as choice]]
-  (score (state choice) b))
+(defn score-p1 [[a b]]
+  (score (outcome b a) b))
 
 (->> (parse-input input)
      (map #(map letter->shape %))
@@ -39,15 +46,9 @@
 (defn score-p2 [[a b]]
   (let [shape (letter->shape a)]
     (case b
-      \X (case shape
-           :rock     (score :loss :scissors)
-           :paper    (score :loss :rock)
-           :scissors (score :loss :paper))
+      \X (score :loss (lose shape))
       \Y (score :draw shape)
-      \Z (case shape
-           :rock     (score :win :paper)
-           :paper    (score :win :scissors)
-           :scissors (score :win :rock)))))
+      \Z (score :win (win shape)))))
 
 (->> (parse-input input)
      (transduce (map score-p2) +)) ; 14979

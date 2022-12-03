@@ -1,6 +1,5 @@
 (ns zelark.aoc-2022.day-01
-  (:require [zelark.aoc.core :as aoc]
-            [clojure.string :as str]))
+  (:require [zelark.aoc.core :as aoc]))
 
 ;; --- Day 1: Calorie Counting ---
 ;; https://adventofcode.com/2022/day/1
@@ -8,17 +7,13 @@
 (def input (aoc/get-input 2022 01))
 
 (defn parse-input [input]
-  (map (fn [xs]
-         (->> (re-seq #"\d+" xs)
-              (transduce (map parse-long) +)))
-       (str/split input #"\R\R")))
+  (->> (aoc/split-on-blankline input)
+       (map aoc/parse-longs)))
+
+(def calories (map aoc/sum (parse-input input)))
 
 ;; part 1
-(->> (parse-input input)
-     (apply max)) ; 68802
+(->> calories (apply max)) ; 68802
 
 ;; part 2
-(->> (parse-input input)
-     (sort >)
-     (take 3)
-     (reduce +)) ; 205370
+(->> calories (sort >) (take 3) aoc/sum) ; 205370

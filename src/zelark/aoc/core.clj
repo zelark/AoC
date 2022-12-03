@@ -16,6 +16,9 @@
 (defn parse-bin [s]
   (Long/parseLong s 2))
 
+(defn split-on-blankline [input]
+  (str/split input #"\R\R"))
+
 ;; Math
 (defn mod-1
   "Returns the 1-based modulus `base` of `n`"
@@ -28,6 +31,9 @@
    (if (<= start end)
      (range start (inc end))
      (range start (dec end) -1))))
+
+(defn sum [xs]
+  (reduce + 0 xs))
 
 ;; Grids
 (defn empty-grid [w h]

@@ -38,6 +38,10 @@
 (defn sum [xs]
   (reduce + 0 xs))
 
+(defn fix-point [f x]
+  (let [x' (f x)]
+    (if (= x x') x (recur f x'))))
+
 ;; Grids
 (defn empty-grid [w h]
   (vec (repeat h (vec (repeat w \.)))))

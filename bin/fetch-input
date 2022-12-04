@@ -2,11 +2,14 @@
 
 [[ -z "$AOC_SESSION" ]] && exit -1
 
-YEAR=2022
+YEAR=${1}
+DAY=${2}
 
-OUTFILE="resources/${YEAR}/input_$(printf "%02d" "${1}").txt"
+OUTPUT_DIR="resources/${YEAR}"
 
-curl "https://adventofcode.com/${YEAR}/day/${1}/input"\
-     --progress-bar\
-     -H "Cookie: session=${AOC_SESSION}"\
-     > $OUTFILE
+[[ ! -d "$OUTPUT_DIR" ]] && mkdir -p "$OUTPUT_DIR"
+
+OUTPUT_FILE="${OUTPUT_DIR}/input_$(printf "%02d" "${DAY}").txt"
+URL="https://adventofcode.com/${YEAR}/day/$(printf "%d" "${DAY}")/input"
+
+curl ${URL} --progress-bar -H "Cookie: session=${AOC_SESSION}" > $OUTPUT_FILE

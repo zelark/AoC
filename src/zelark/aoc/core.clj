@@ -42,6 +42,9 @@
   (let [x' (f x)]
     (if (= x x') x (recur f x'))))
 
+(defn transpose [v]
+  (apply mapv vector v))
+
 ;; Grids
 (defn empty-grid [w h]
   (vec (repeat h (vec (repeat w \.)))))

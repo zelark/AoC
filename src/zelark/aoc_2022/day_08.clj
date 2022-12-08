@@ -33,22 +33,19 @@
 ;; part 1
 (defn visible? [grid loc]
   (let [height (aoc/grid-get grid loc)
-        taller? #(>= % height)]
+        taller? #(<= height %)]
     (->> (related-trees grid loc)
          (map #(some taller? %))
          (some nil?)
          (boolean))))
 
 (let [max-x (count (first grid))
-      max-y (count grid)
-      outer (- (* max-x max-y)
-               (* (- max-x 2) (- max-y 2)))
-      inner (->> (for [x (range 1 (dec max-x))
-                       y (range 1 (dec max-y))
-                       :when (visible? grid [x y])]
-                   [x y])
-                 (count))]
-  (+ outer inner)) ; 1676
+      max-y (count grid)]
+  (->> (for [x (range max-x)
+             y (range max-y)
+             :when (visible? grid [x y])]
+         [x y])
+       (count))) ; 1676
 
 ;; part 2
 (defn viewing-distance [height trees]

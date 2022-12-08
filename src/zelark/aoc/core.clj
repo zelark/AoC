@@ -46,6 +46,9 @@
   (apply mapv vector v))
 
 ;; Grids
+(defn grid-get [grid [x y]]
+  (get-in grid [y x]))
+
 (defn empty-grid [w h]
   (vec (repeat h (vec (repeat w \.)))))
 

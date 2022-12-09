@@ -1,6 +1,7 @@
 (ns zelark.aoc-2022.day-09
   (:require [zelark.aoc.core :as aoc]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [clojure.math :as math]))
 
 ;; --- Day 9: Rope Bridge ---
 ;; https://adventofcode.com/2022/day/9
@@ -22,9 +23,6 @@
 
 (defn near? [a b] (adjacent? (sub a b)))
 
-(defn delta [a]
-  (if (zero? a) a (if (neg? a) -1 1)))
-
 ;; [# # # # #]
 ;; [# . . . #]
 ;; [# . # . #]
@@ -33,7 +31,7 @@
 
 (defn direction [a b]
   (let [[dx dy] (sub a b)]
-    [(delta dx) (delta dy)]))
+    [(long (math/signum dx)) (long (math/signum dy))]))
 
 (defn follow [a b]
   (if (near? a b)

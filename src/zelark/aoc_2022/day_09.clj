@@ -22,8 +22,8 @@
 
 (defn near? [a b] (adjacent? (sub a b)))
 
-(defn delta [x]
-  (if (zero? x) x (if (neg? x) -1 1)))
+(defn delta [a]
+  (if (zero? a) a (if (neg? a) -1 1)))
 
 ;; [# # # # #]
 ;; [# . . . #]
@@ -35,33 +35,33 @@
   (let [[dx dy] (sub a b)]
     [(delta dx) (delta dy)]))
 
-(defn step [a b]
+(defn follow [a b]
   (if (near? a b)
     b
     (add b (direction a b))))
 
-(defn move [state cmd]
+(defn move-rope [state cmd]
   (let [[dir n] cmd]
     (loop [state state
            n n]
       (if (zero? n)
         state
-        (recur (let [{:keys [body]} state
-                     head  (first body)
+        (recur (let [{:keys [rope]} state
+                     head  (first rope)
                      head' (add head (get dirs dir))
-                     body' (reduce (fn [acc part]
-                                     (conj acc (step (peek acc) part)))
+                     rope' (reduce (fn [a b]
+                                     (conj a (follow (peek a) b)))
                                    [head']
-                                   (rest body))]
+                                   (rest rope))]
                  (-> state
-                     (assoc :body body')
-                     (update :steps conj (peek body'))))
+                     (assoc :rope rope')
+                     (update :steps conj (peek rope'))))
                (dec n))))))
 
 (defn solve [input n]
   (->> (parse-input input)
-       (reduce move {:body (repeat n [0 0])
-                     :steps #{}})
+       (reduce move-rope {:rope (repeat n [0 0])
+                          :steps #{}})
        :steps
        (count)))
 

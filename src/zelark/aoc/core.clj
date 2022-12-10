@@ -1,7 +1,8 @@
 (ns zelark.aoc.core
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.java.shell :as shell]))
+            [clojure.java.shell :as shell]
+            [clojure.edn :as edn]))
 
 (defn get-input [year day]
   (let [path-to-file (format "%d/input_%02d.txt" year day)
@@ -21,6 +22,12 @@
 
 (defn split-on-blankline [input]
   (str/split input #"\R\R"))
+
+(defn parse-asm-code [input]
+  (->> (str/split-lines input)
+       (mapv #(str "[" % "]"))
+       (mapv edn/read-string)
+       (mapv (fn [x] (mapv #(cond-> % (symbol? %) keyword) x)))))
 
 ;; Math
 (defn mod-1

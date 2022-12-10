@@ -14,17 +14,16 @@
 
 ;; part 1
 (let [xs (vec (cons 0 (parse-input input)))] ; add zero to align with cycles
-  (->> (range 20 260 40)
+  (->> [20 60 100 140 180 220]
        (map #(* % (xs %)))
        (reduce +))) ; 11720
 
 ;; part 2
-(defn ->px [cycle pos]
-  (let [delta    (- (mod cycle 40) pos)
-        visible? (<= -1 delta 1)]
+(defn ->px [crt-pos sprite-pos]
+  (let [visible? (<= -1 (- crt-pos sprite-pos) 1)]
     (if visible? \# \.)))
 
 (->> (parse-input input)
-     (map-indexed ->px)
+     (map ->px (cycle (range 40)))
      (partition 40)
      (map #(str/join %))) ; ERCREPCJ

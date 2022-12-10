@@ -14,8 +14,6 @@
               (let [[c n] (str/split line #" ")]
                 [(keyword c) (parse-long n)])))))
 
-(def dirs {:U [0 -1] :R [1 0] :D [0 1] :L [-1 0]})
-
 (defn sub [a b] (mapv - a b))
 (defn add [a b] (mapv + a b))
 
@@ -38,29 +36,18 @@
     b
     (add b (direction a b))))
 
-(defn move-rope [state cmd]
-  (let [[dir n] cmd]
-    (loop [state state
-           n n]
-      (if (zero? n)
-        state
-        (recur (let [{:keys [rope]} state
-                     head  (first rope)
-                     head' (add head (get dirs dir))
-                     rope' (reduce (fn [a b]
-                                     (conj a (follow (peek a) b)))
-                                   [head']
-                                   (rest rope))]
-                 (-> state
-                     (assoc :rope rope')
-                     (update :steps conj (peek rope'))))
-               (dec n))))))
+(defn move-rope [[head & tail] delta]
+  (reduce #(conj %1 (follow (peek %1) %2))
+          [(add head delta)]
+          tail))
 
 (defn solve [input n]
   (->> (parse-input input)
-       (reduce move-rope {:rope (repeat n [0 0])
-                          :steps #{}})
-       :steps
+       (mapcat (fn [[cmd n]] (repeat n cmd)))
+       (map {:U [0 -1] :R [1 0] :D [0 1] :L [-1 0]})
+       (reductions move-rope (vec (repeat n [0 0])))
+       (map peek)
+       (set)
        (count)))
 
 ;; part 1

@@ -87,12 +87,12 @@
       (recur (cons node route) (came-from node))
       route)))
 
-(defn bfs [graph start goal]
+(defn bfs [graph start goal?]
   (loop [seen  {start nil}
          queue (queue start)
          n     0]
     (when-let [current (peek queue)]
-      (if (= current goal)
+      (if (goal? current)
         (generate-route current seen)
         (let [[seen queue] (reduce (fn [[seen queue :as acc] node]
                                      (if (contains? seen node)

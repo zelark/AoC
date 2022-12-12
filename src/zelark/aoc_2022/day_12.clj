@@ -17,10 +17,7 @@
                    (assoc m loc h)))
                {})))
 
-(defn can-move? [p1 p2]
-  (<= (- (int p2) (int p1)) 1))
-
-(defn moves [heightmap [x y :as src]]
+(defn moves [heightmap can-move? [x y :as src]]
   (for [dst [[x (dec y)] [(inc x) y] [x (inc y)] [(dec x) y]]
         :when (heightmap dst)
         :when (can-move? (heightmap src) (heightmap dst))]
@@ -29,13 +26,17 @@
 (def heightmap (parse-input input))
 
 ;; part 1
-(count (aoc/bfs (partial moves heightmap)
-                (:start heightmap)
-                (:end heightmap))) ; 528
+(let [can-move? (fn [p1 p2] (<= (- (int p2) (int p1)) 1))]
+  (count (aoc/bfs (partial moves heightmap can-move?)
+                  (:start heightmap)
+                  #(= % (:end heightmap))))) ; 528
 
-;; part 2
-(->> (for [start (reduce-kv (fn [acc loc h] (if (= h \a) (conj acc loc) acc)) [] heightmap)
-           :let  [path (aoc/bfs (partial moves heightmap) start (:end heightmap))]
-           :when (some? path)] ; Only walkable paths.
-       (count path))
-     (apply min))  ; 522
+;; part 2 (There is a trick, we can do reverse search from goal to the nearest start).
+(let [goal? (reduce-kv (fn [acc loc h]
+                         (if (= h \a) (conj acc loc) acc))
+                       #{}
+                       heightmap)
+      can-move? (fn [p1 p2] (<= (- (int p1) (int p2)) 1))]
+  (count (aoc/bfs (partial moves heightmap can-move?)
+                  (:end heightmap)
+                  goal?))) ; 522

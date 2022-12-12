@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.java.shell :as shell]
-            [clojure.edn :as edn]))
+            [clojure.edn :as edn])
+  (:import [clojure.lang PersistentQueue]))
 
 (defn get-input [year day]
   (let [path-to-file (format "%d/input_%02d.txt" year day)
@@ -11,6 +12,9 @@
       (load-input path-to-file)
       (do (shell/sh "./bin/fetch-input" (str year) (str day))
           (load-input path-to-file)))))
+
+(defn queue [& args]
+  (into PersistentQueue/EMPTY args))
 
 ;; Parsing
 (defn parse-longs [s]
@@ -74,3 +78,26 @@
                 (empty-grid (inc max-x) (inc max-y))
                 points)
         (print-grid))))
+
+;; path finding
+(defn- generate-route [node came-from]
+  (loop [route ()
+         node node]
+    (if (came-from node)
+      (recur (cons node route) (came-from node))
+      route)))
+
+(defn bfs [graph start goal]
+  (loop [seen  {start nil}
+         queue (queue start)
+         n     0]
+    (when-let [current (peek queue)]
+      (if (= current goal)
+        (generate-route current seen)
+        (let [[seen queue] (reduce (fn [[seen queue :as acc] node]
+                                     (if (contains? seen node)
+                                       acc
+                                       [(assoc seen node current) (conj queue node)]))
+                                   [seen (pop queue)]
+                                   (graph current))]
+          (recur seen queue (inc n)))))))

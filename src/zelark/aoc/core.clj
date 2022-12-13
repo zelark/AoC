@@ -49,6 +49,9 @@
 (defn sum [xs]
   (reduce + 0 xs))
 
+(defn mul [xs]
+  (reduce * 1 xs))
+
 (defn fix-point [f x]
   (let [x' (f x)]
     (if (= x x') x (recur f x'))))

@@ -16,30 +16,27 @@
   (->> (aoc/split-on-blankline input)
        (map parse-pair)))
 
-(defn cmp [[left & left-rest] [right & right-rest]]
+(defn packet-cmp [a b]
   (cond
-    (every? nil? [left right]) nil
-    (nil? left)  true
-    (nil? right) false
+    (and (number? a) (number? b))
+    (- a b)
 
-    (every? number? [left right])
-    (if (= left right)
-      (recur left-rest right-rest)
-      (< left right))
+    (and (vector? a) (vector? b))
+    (or (->> (map packet-cmp a b)
+             (drop-while zero?)
+             (first))
+        (- (count a) (count b)))
+    
+    (number? a) (recur [a] b)
+    (number? b) (recur a [b])
+    :else       (throw (IllegalArgumentException. "Wrong packet was passed."))))
 
-    (every? vector? [left right])
-    (if-some [ret (cmp left right)]
-      ret
-      (recur left-rest right-rest))
-
-    (number? left)  (recur (cons [left] left-rest) (cons right right-rest))
-    (number? right) (recur (cons left left-rest)   (cons [right] right-rest))
-
-    :else (recur left-rest right-rest)))
+(defn right-order? [a b]
+  (neg? (packet-cmp a b)))
 
 ;; part 1
 (->> (parse-input input)
-     (keep-indexed #(when (apply cmp %2) (inc %1)))
+     (keep-indexed (fn [idx [a b]] (when (right-order? a b) (inc idx))))
      (aoc/sum)) ; 5350
 
 ;; part 2
@@ -48,6 +45,6 @@
       d6 [[6]]
       delimiter? #{d2 d6}]
   (->> (into packets [d2 d6])
-       (sort cmp)
-       (keep-indexed #(when (delimiter? %2) (inc %1)))
+       (sort packet-cmp)
+       (keep-indexed (fn [idx a] (when (delimiter? a) (inc idx))))
        (aoc/mul))) ; 19570

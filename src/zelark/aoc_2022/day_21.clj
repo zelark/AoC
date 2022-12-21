@@ -32,10 +32,11 @@
 ;; part 1
 (yell (parse input) :root) ; => 379578518396784
 
-;; part 2: solved it manually with binary search.
-(let [number 3353687996514
-      monkey->job (-> (parse input)
-                      (assoc-in [:root :op] compare)
-                      (assoc-in [:humn :number] number))]
-  (when (zero? (yell monkey->job :root))
-    number)) ; => 3353687996514
+;; part 2: It turned out we can find the number with extrapolation.
+(let [monkey->job (-> (parse input)
+                      (assoc-in [:root :op] -))
+      y0 (yell (assoc-in monkey->job [:humn :number] 0) :root)
+      y1 (yell (assoc-in monkey->job [:humn :number] 1) :root)
+      n  (/ y0 (- y0 y1))]
+  (when (zero? (yell (assoc-in monkey->job [:humn :number] n) :root))
+    (long n))) ; => 3353687996514

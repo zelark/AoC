@@ -31,6 +31,14 @@
     (number? b) (recur a [b])
     :else       (throw (IllegalArgumentException. "Wrong packet was passed."))))
 
+(comment
+  ;; Default comparing for vectors is almost what we need
+  ;; but in reverse order: first compare for elements,
+  ;; and only then compare for sizes.
+  (compare    [0 0 0 0] [1 1 1])  ; => 1
+  (packet-cmp [0 0 0 0] [1 1 1])  ; => -1
+)
+
 (defn right-order? [a b]
   (neg? (packet-cmp a b)))
 

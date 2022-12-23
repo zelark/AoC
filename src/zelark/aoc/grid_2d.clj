@@ -22,11 +22,9 @@
     [(+ x dx) (+ y dy)]))
 
 (defn boundaries [points]
-  (let [points (cond-> points map? keys)
-        min-x (apply min (map #(nth % 0) points))
-        max-x (apply max (map #(nth % 0) points))
-        min-y (apply min (map #(nth % 1) points))
-        max-y (apply max (map #(nth % 1) points))]
+  (let [points (cond-> points (map? points) keys)
+        [min-x max-x] (apply (juxt min max) (map first  points))
+        [min-y max-y] (apply (juxt min max) (map second points))]
     [[min-x min-y]
      [max-x max-y]]))
 

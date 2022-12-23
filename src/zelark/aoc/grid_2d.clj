@@ -1,5 +1,9 @@
 (ns zelark.aoc.grid-2d
-  (:require [clojure.string :as str]))
+  (:refer-clojure :exclude [count])
+  (:require [clojure.string :as str]
+            [zelark.aoc.core :as aoc]))
+
+;; General things
 
 (defn parse [input pred]
   (->> (str/split-lines input)
@@ -18,7 +22,8 @@
     [(+ x dx) (+ y dy)]))
 
 (defn boundaries [points]
-  (let [min-x (apply min (map #(nth % 0) points))
+  (let [points (cond-> points map? keys)
+        min-x (apply min (map #(nth % 0) points))
         max-x (apply max (map #(nth % 0) points))
         min-y (apply min (map #(nth % 1) points))
         max-y (apply max (map #(nth % 1) points))]
@@ -33,3 +38,26 @@
   (let [[[xl yl] [xr yr]] boundaries]
     (and (<= xl x xr)
          (<= yl y yr))))
+
+(defn count
+  "Counts occurrences of `v` among `grid` values."
+  [grid v]
+  (transduce (keep #(when (= % v) 1)) + (vals grid)))
+
+;; Lines
+
+(defn straight-line? [[x1 y1] [x2 y2]]
+  (or (== x1 x2) (== y1 y2)))
+
+(defn straight-line-points [[x1 y1] [x2 y2]]
+  (for [x (aoc/rangex x1 x2)
+        y (aoc/rangex y1 y2)]
+    [x y]))
+
+(defn diagonal-line-points [[x1 y1] [x2 y2]]
+  (map vector (aoc/rangex x1 x2) (aoc/rangex y1 y2)))
+
+(defn line-points [a b]
+  (if (straight-line? a b)
+    (straight-line-points a b)
+    (diagonal-line-points a b)))

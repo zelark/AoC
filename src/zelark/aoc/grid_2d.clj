@@ -10,6 +10,9 @@
        (mapcat (fn [y line] (keep-indexed (fn [x ch] (when (pred ch) [[x y] ch])) line)) (range))
        (reduce (fn [m [loc ch]] (assoc m loc ch)) {})))
 
+(defn plus [[^long x ^long y] [^long dx ^long dy]]
+  [(+ x dx) (+ y dy)])
+
 (defn neighbors [[x y]]
   (for [[dx dy] [[-1  0] [1 0]
                  [ 0 -1] [0 1]]]
@@ -31,6 +34,10 @@
 (defn extend-boundaries [[lower upper]]
   [(mapv dec lower)
    (mapv inc upper)])
+
+(defn narrow-boundaries [[lower upper]]
+  [(mapv inc lower)
+   (mapv dec upper)])
 
 (defn in-bounds? [boundaries [x y]]
   (let [[[xl yl] [xr yr]] boundaries]

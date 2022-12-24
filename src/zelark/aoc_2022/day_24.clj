@@ -15,7 +15,7 @@
     {:walls     walls
      :blizzards (update-vals blizzards list)
      :bounds    bounds
-     :start     [(inc min-x) min-y]
+     :entrance  [(inc min-x) min-y]
      :goal      [(dec max-x) max-y]}))
 
 (defn move-blizzard [mx my [x y] blizzard]
@@ -25,13 +25,13 @@
     \< [(aoc/mod-1 (dec x) mx) y]
     \> [(aoc/mod-1 (inc x) mx) y]))
 
-(defn blow [mx my blizzards]
-  (reduce-kv (fn [m1 loc blzs]
-               (reduce (fn [m2 b]
-                         (let [new-loc (move-blizzard mx my loc b)]
-                           (update m2 new-loc conj b))) m1 blzs))
-             {}
-             blizzards))
+(defn blow [mx my pos->blizzards]
+  (reduce-kv (fn [m pos blizzards]
+               (reduce (fn [m blizzard]
+                         (let [new-pos (move-blizzard mx my pos blizzard)]
+                           (update m new-pos conj blizzard)))
+                       m blizzards))
+             {} pos->blizzards))
 
 (defn moves [bounds walls blizzards pos]
   (for [dir [[0 -1] [+1 0] [0 +1] [-1 0] [0 0]]
@@ -54,11 +54,11 @@
              (inc minute)))))
 
 (defn solve [part input]
-  (let [{:keys [walls blizzards bounds start goal]} (parse input)
+  (let [{:keys [walls blizzards bounds entrance goal]} (parse input)
         [_ [bmx bmy]] (g2/narrow-boundaries bounds)
         blow  (partial blow bmx bmy)
         moves (partial moves bounds walls)
-        init-state {:start start
+        init-state {:start entrance
                     :goal goal
                     :minute 0
                     :blizzards (next (iterate blow blizzards))}

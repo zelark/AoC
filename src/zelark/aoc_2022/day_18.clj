@@ -18,7 +18,7 @@
   (->> droplets
        (mapcat g3/neighbors)
        (remove droplets)
-       (count))) ; 3550
+       (count))) ; => 3550
 
 ;; part 2
 (defn flood [discover start]
@@ -47,4 +47,14 @@
   (->> (flood discover (first boundaries))
        (reduce (fn [acc w]
                  (+ acc (count (filter droplets (g3/neighbors w)))))
-               0))) ; 2028
+               0))) ; => 2028
+
+;; visualisation
+(let [droplets (parse input)]
+  (doseq [[z slice] (->> droplets
+                         (group-by (fn [[_ _ z]] z))
+                         (sort))
+          :let [grid (aoc/empty-grid 20 20)]]
+    (prn :slice z)
+    (-> (reduce (fn [g [x y _]] (aoc/mark-point g [x y] \#)) grid slice)
+        (aoc/print-grid))))

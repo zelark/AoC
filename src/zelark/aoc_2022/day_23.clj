@@ -10,6 +10,10 @@
 (defn parse [input]
   (->> (g2/parse input #{\#}) keys set))
 
+;; NW  N  NE
+;;  W  ^  E
+;; SW  S  SE
+
 (def directions
   (->> (for [[dx dy] [[-1 -1] [0 -1] [+1 -1]   ; NW N NE
                       [-1 +1] [0 +1] [+1 +1]   ; SW S SE
@@ -19,28 +23,27 @@
        (partition 3)))
 
 (defn check-dir [elves elf dir]
-  (let [adjacent (map #(mapv + %1 %2) (repeat elf) dir)]
+  (let [adjacent (map g2/plus (repeat elf) dir)]
     (when-not (some elves adjacent)
-      (mapv + elf (second dir)))))
+      (g2/plus elf (second dir)))))
 
 (defn make-proposals [elves dirs]
   (reduce (fn [m elf]
             (if (some elves (g2/all-neighbors elf))
-              (if-let [propose (some #(check-dir elves elf %) dirs)]
-                (assoc m elf propose)
-                (assoc m elf elf))
-              (assoc m elf elf)))
+              (if-let [proposal (some #(check-dir elves elf %) dirs)]
+                (update m proposal conj elf)
+                (assoc m elf [elf]))
+              (assoc m elf [elf])))
           {}
           elves))
 
 (defn step [elves dirs]
-  (let [elf->propose (make-proposals elves dirs)
-        clashes (frequencies (vals elf->propose))
-        clash? #(<= 2 (clashes %))]
-    (reduce-kv (fn [elves elf prop]
-                 (conj elves (if (clash? prop) elf prop)))
-               #{}
-               elf->propose)))
+  (->> (make-proposals elves dirs)
+       (reduce-kv (fn [acc prop elves]
+                    (if (== (count elves) 1)
+                      (conj acc prop)
+                      (into acc elves)))
+                  #{})))
 
 (defn count-empty-titels [elves]
   (let [[[x1 y1] [x2 y2]] (g2/boundaries elves)]

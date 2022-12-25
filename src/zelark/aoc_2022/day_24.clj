@@ -33,38 +33,38 @@
                        m blizzards))
              {} pos->blizzards))
 
-(defn moves [bounds walls blizzards pos]
-  (for [dir [[0 -1] [+1 0] [0 +1] [-1 0] [0 0]]
-        :let [new-pos (g2/plus pos dir)]
-        :when (and (g2/in-bounds? bounds new-pos)
-                   (not (walls new-pos))
-                   (not (blizzards new-pos)))]
-    new-pos))
-
-(defn dodge [{:keys [start goal minute blizzards] :as state} moves]
-  (loop [blizzards blizzards
-         positions [start]
+(defn dodge [{:keys [start goal minute] :as state} moves]
+  (loop [positions [start]
          minute minute]
     (if (some #{goal} positions)
-      (assoc state :minute minute, :blizzards blizzards)
-      (recur (next blizzards)
-             (set (for [cpos positions
-                        npos (moves (first blizzards) cpos)]
+      (assoc state :minute minute)
+      (recur (set (for [cpos positions
+                        npos (moves (inc minute) cpos)]
                     npos))
              (inc minute)))))
 
 (defn solve [part input]
   (let [{:keys [walls blizzards bounds entrance goal]} (parse input)
         [_ [bmx bmy]] (g2/narrow-boundaries bounds)
-        blow  (partial blow bmx bmy)
-        moves (partial moves bounds walls)
+        blow (partial blow bmx bmy)
+        max-minute (aoc/lcm bmx bmy) ; After the minute blizzards will get initial state.
+        minute->blizzards (->> (iterate blow blizzards)
+                               (take max-minute)
+                               (vec))
+        moves (fn [minute pos]
+                (let [blizzards (nth minute->blizzards (mod minute max-minute))]
+                  (for [dir [[0 -1] [+1 0] [0 +1] [-1 0] [0 0]]
+                        :let [new-pos (g2/plus pos dir)]
+                        :when (and (g2/in-bounds? bounds new-pos)
+                                   (not (walls new-pos))
+                                   (not (blizzards new-pos)))]
+                    new-pos)))
         init-state {:start entrance
                     :goal goal
-                    :minute 0
-                    :blizzards (next (iterate blow blizzards))}
-        swap #(set/rename-keys % {:start :goal :goal :start})]
-    (->> (iterate #(-> % (dodge moves) swap) init-state)
-         (drop ({:p1 1 :p2 3} part))
+                    :minute 0}
+        back #(set/rename-keys % {:start :goal :goal :start})]
+    (->> (iterate #(-> % (dodge moves) back) init-state)
+         (drop ({:p1 1 :p2 3} part part))
          (first)
          :minute)))
 

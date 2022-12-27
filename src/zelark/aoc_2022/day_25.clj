@@ -32,3 +32,13 @@
 ;; part 2
 ;; With all 50 stars we can start the blender, and make a smoothie
 ;; to the reindeer.
+
+;; Just for fun here is SNAFU addition table:
+;;
+;;             =  -  0  1  2
+;;          = -1 -2  =  -  0
+;;          - -2  =  -  0  1
+;;          0  =  -  0  1  2
+;;          1  -  0  1  2 1=
+;;          2  0  1  2 1= 1-
+;;

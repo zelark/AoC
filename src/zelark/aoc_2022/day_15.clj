@@ -1,6 +1,7 @@
 (ns zelark.aoc-2022.day-15
-  (:require [zelark.aoc.core :as aoc]
-            [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [zelark.aoc.core :as aoc]
+            [zelark.aoc.grid-2d :as g2]))
 
 ;; --- Day 15: Beacon Exclusion Zone ---
 ;; https://adventofcode.com/2022/day/15
@@ -30,3 +31,29 @@
                       scanners)]
   (- (inc (- x2 x1))
      (count (filter #(= (:y %) ry) beacons)))) ; => 5809294
+
+;; part 2: it runs slowly, about 26152 msecs.
+(defn scanner-edges [in-bounds? {:keys [x y dist]}]
+  (let [delta (inc dist)]
+    (->> [[[x (- y delta)] [(+ x delta) y]]
+          [[(+ x delta) y] [x (+ y delta)]]
+          [[x (+ y delta)] [(- x delta) y]]
+          [[(- x delta) y] [x (- y delta)]]]
+         (mapcat #(next (apply g2/line-points %)))
+         (filter in-bounds?))))
+
+(defn scanned? [scanners position]
+  (->> scanners
+       (map (fn [{:keys [dist x y]}]
+              (< dist (aoc/manhattan-distance [x y] position))))
+       (some false?)))
+
+(defn tuning-frequency [[x y]]
+  (+ (* x 4000000) y))
+
+(let [{:keys [scanners]} (parse input)
+      in-bounds? (partial g2/in-bounds? [[0 0] [4000000 4000000]])]
+  (first (for [scanner  (sort-by :dist scanners)
+               position (scanner-edges in-bounds? scanner)
+               :when    (not (scanned? (disj scanners scanner) position))]
+           (tuning-frequency position)))) ; => 10693731308112

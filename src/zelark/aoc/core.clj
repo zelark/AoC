@@ -5,13 +5,16 @@
             [clojure.edn :as edn])
   (:import [clojure.lang PersistentQueue]))
 
-(defn get-input [year day]
-  (let [path-to-file (format "%d/input_%02d.txt" year day)
-        load-input #(-> % io/resource slurp str/trim-newline)]
-    (if (.exists (io/file path-to-file))
-      (load-input path-to-file)
-      (do (shell/sh "./bin/fetch-input" (str year) (str day))
-          (load-input path-to-file)))))
+(defn get-input
+  ([year day & [option]]
+   (let [path-to-file (io/resource (format "%d/input_%02d.txt" year day))
+         load-input #(-> % slurp str/trim-newline)]
+     (if (or (not (.exists (io/file path-to-file)))
+             (= option :force-load))
+       (do (println "Downloading" (str path-to-file))
+           (shell/sh "./bin/fetch-input" (str year) (str day))
+           (load-input path-to-file))
+       (load-input path-to-file)))))
 
 (defn queue [& args]
   (into PersistentQueue/EMPTY args))

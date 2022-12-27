@@ -42,6 +42,11 @@
   [n base]
   (inc (mod (dec n) base)))
 
+(defn one?
+  "Returns true if `n` is zero, else false."
+  [n]
+  (== n 1))
+
 (defn rangex
   ([] ())
   ([start end]

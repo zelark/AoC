@@ -6,11 +6,11 @@
   (:import [clojure.lang PersistentQueue]))
 
 (defn get-input
-  ([year day & [option]]
+  ([year day & {:keys [fetch?]}]
    (let [path-to-file (io/resource (format "%d/input_%02d.txt" year day))
          load-input #(-> % slurp str/trim-newline)]
      (if (or (not (.exists (io/file path-to-file)))
-             (= option :force-load))
+             fetch?)
        (do (println "Downloading" (str path-to-file))
            (shell/sh "./bin/fetch-input" (str year) (str day))
            (load-input path-to-file))
@@ -18,6 +18,10 @@
 
 (defn queue [& args]
   (into PersistentQueue/EMPTY args))
+
+(defn index-by
+  [f coll]
+  (persistent! (reduce #(assoc! %1 (f %2) %2) (transient {}) coll)))
 
 ;; Parsing
 (defn parse-longs [s]
@@ -47,9 +51,20 @@
   [n]
   (== n 1))
 
+(== 1.0 1)
+
+(defn gcd [a b]
+  (if (zero? b) a (recur b (mod a b))))
+
+(defn lcm
+  ([] 1)
+  ([a] a)
+  ([a b] (/ (* a b) (gcd a b)))
+  ([a b & rst] (reduce lcm (lcm a b) rst)))
+
 (defn rangex
   ([] ())
-  ([start end]
+  ([^long start ^long end]
    (if (<= start end)
      (range start (inc end))
      (range start (dec end) -1))))
@@ -90,6 +105,32 @@
                 points)
         (print-grid))))
 
+(defn print-points-2 [loc->ch]
+  (let [points (keys loc->ch)
+        max-x  (apply max (map first points))
+        max-y  (apply max (map second points))
+        min-x  (apply min (map first points))
+        min-y  (apply min (map second points))
+        off-x  min-x
+        off-y  min-y
+        grid   (empty-grid (count (range min-x (inc max-x)))
+                           (count (range min-y (inc max-y))))]
+    ;; (prn :min-x min-x :max-x max-x)
+    ;; (prn :min-y min-y :max-y max-y)
+    ;; (prn :off-x off-x :off-y off-y)
+    ;; (print-grid grid)
+    (-> (reduce-kv (fn [g [x y] ch]
+                     (let [normed-loc [(+ x (- off-x)) (+ y (- off-y))]]
+                       (mark-point g normed-loc ch)))
+                   grid
+                   loc->ch)
+        (print-grid))))
+
+(defn manhattan-distance [[^long x1 ^long y1] [^long x2 ^long y2]]
+  (+ (abs (- x2 x1)) (abs (- y2 y1))))
+
+(set! *warn-on-reflection* true)
+
 ;; path finding
 (defn- generate-route [node came-from]
   (loop [route ()
@@ -100,8 +141,7 @@
 
 (defn bfs [graph start goal?]
   (loop [seen  {start nil}
-         queue (queue start)
-         n     0]
+         queue (queue start)]
     (when-let [current (peek queue)]
       (if (goal? current)
         (generate-route current seen)
@@ -111,4 +151,4 @@
                                        [(assoc seen node current) (conj queue node)]))
                                    [seen (pop queue)]
                                    (graph current))]
-          (recur seen queue (inc n)))))))
+          (recur seen queue))))))

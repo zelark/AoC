@@ -33,12 +33,12 @@
         max-pressure (fn max-pressure [time pressure valve ks answer]
                        (let [answer' (update answer ks (fnil max 0) pressure)
                              answers (for [target target-valves
-                                           :let   [required-time (inc (cost [valve target]))
-                                                   left-time     (- time required-time)]
-                                           :when  (and (zero? (bit-and ks (valve->power target)))
-                                                       (< required-time time))]
-                                       (max-pressure left-time
-                                                     (+ pressure (* (get flow-rate target) left-time))
+                                           :let   [time-required (inc (cost [valve target]))
+                                                   time-left     (- time time-required)]
+                                           :when  (and (zero? (bit-and ks (valve->power target))) ; Not yet opened, and
+                                                       (< time-required time))]                   ; time enough.
+                                       (max-pressure time-left
+                                                     (+ pressure (* (get flow-rate target) time-left))
                                                      target
                                                      (bit-or ks (valve->power target))
                                                      answer'))]
@@ -56,6 +56,6 @@
 (let [answer (solve input 26)]
   (->> (for [[k1 v1] answer
              [k2 v2] answer
-             :when (zero? (bit-and k1 k2))]
-         (+ v1 v2))
-       (apply max))) ; => 2911
+             :when (zero? (bit-and k1 k2))] ; Only inverted keys make sense. 1010 and 0101 are inverted,
+         (+ v1 v2))                         ; that is the elephant and me opened different valves.
+       (apply max))) ; => 2911              ; Then we add their values (max pressure released), and find a maximum one.

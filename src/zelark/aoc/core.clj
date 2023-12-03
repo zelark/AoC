@@ -7,9 +7,9 @@
 
 (defn get-input
   ([year day & {:keys [fetch?]}]
-   (let [path-to-file (io/resource (format "%d/input_%02d.txt" year day))
-         load-input #(-> % slurp str/trim-newline)]
-     (if (or (not (.exists (io/file path-to-file)))
+   (let [path-to-file (format "%d/input_%02d.txt" year day)
+         load-input #(-> % io/resource slurp str/trim-newline)]
+     (if (or (not (io/resource path-to-file))
              fetch?)
        (do (println "Downloading" (str path-to-file))
            (shell/sh "./bin/fetch-input" (str year) (str day))

@@ -40,13 +40,11 @@
 
   Splits line's items with `re`, and apply `f` to each item.
 
-  Returns a hash-map: {id1 items1, id2 items2, ...}."
+  Returns a vector of vectors: [[id1 items1] [id2 items2] ...]."
   [input re f]
   (->> (str/split-lines input)
-       (reduce (fn [m cline]
-                 (let [[id items] (parse-cline cline re f)]
-                   (assoc m id items)))
-               {})))
+       (mapv #(parse-cline % re f))))
+
 (defn parse-bin [s]
   (Long/parseLong s 2))
 
@@ -171,3 +169,18 @@
                                    [seen (pop queue)]
                                    (graph current))]
           (recur seen queue))))))
+
+;; nubmers and digits
+(defn ch->digit [c]
+  (- (int c) (int \0)))
+
+(defn add-decit [n d]
+  (+ (* n 10) d))
+
+(defn nlen
+  ([num] (nlen num 0))
+  ([num n]
+   (let [q (quot num 10)]
+     (if (zero? q)
+       (inc n)
+       (recur q (inc n))))))

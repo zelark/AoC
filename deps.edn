@@ -1,4 +1,6 @@
 {:paths ["src" "resources"]
  :deps {org.clojure/clojure {:mvn/version "1.11.1"}
         astar-search/astar-search {:mvn/version "0.2"}
-        org.clojure/math.combinatorics {:mvn/version "0.1.6"}}}
+        org.clojure/math.combinatorics {:mvn/version "0.1.6"}
+        org.clojure/core.match {:mvn/version "1.0.1"}
+        dev.weavejester/medley {:mvn/version "1.7.0"}}}

@@ -1,6 +1,7 @@
 (ns zelark.aoc-2023.day-09
   (:require [zelark.aoc.core :as aoc]
-            [clojure.string :as str]))
+            [clojure.string :as str]
+            [medley.core :as mdl]))
 
 ;; --- Day 9: Mirage Maintenance ---
 ;; https://adventofcode.com/2023/day/9
@@ -12,9 +13,10 @@
        (mapv aoc/parse-longs)))
 
 (defn extrapolate [orig-seq]
-  (->> (iterate (fn [xs] (mapv - (rest xs) xs)) (vec orig-seq))
-       (aoc/take-until #(every? zero? %))
-       (map peek)
+  (->> (reverse orig-seq)
+       (iterate (fn [xs] (map - xs (rest xs))))
+       (mdl/take-upto #(every? zero? %))
+       (map first)
        (reduce (fn [acc n] (+ n acc)))))
 
 ;; part 1

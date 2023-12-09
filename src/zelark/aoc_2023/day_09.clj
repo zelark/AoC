@@ -11,13 +11,11 @@
   (->> (str/split-lines input)
        (mapv aoc/parse-longs)))
 
-(defn extrapolate [orig-seq & {:keys [backward?]}]
-  (let [[pull op] (if backward? [first -] [peek +])]
-    (->> (iterate (fn [xs] (mapv - (rest xs) xs)) orig-seq)
-         (aoc/take-until #(every? zero? %))
-         (map pull)
-         (reverse)
-         (reduce (fn [acc n] (op n acc))))))
+(defn extrapolate [orig-seq]
+  (->> (iterate (fn [xs] (mapv - (rest xs) xs)) (vec orig-seq))
+       (aoc/take-until #(every? zero? %))
+       (map peek)
+       (reduce (fn [acc n] (+ n acc)))))
 
 ;; part 1
 (->> (parse-input input)
@@ -26,5 +24,6 @@
 
 ;; part 2
 (->> (parse-input input)
-     (map #(extrapolate % :backward? true))
+     (map reverse)
+     (map extrapolate)
      (aoc/sum)) ; 1057

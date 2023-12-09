@@ -28,6 +28,25 @@
   (->> (re-seq #"-?\d+" s)
        (mapv parse-long)))
 
+(defn- parse-cline [line re f]
+  (let [[id chunks] (str/split line #":")
+        id (parse-long (re-find #"\d+" id))
+        chunks (str/split chunks re)]
+    [id (mapv (comp f str/trim) chunks)]))
+
+(defn parse-clines
+  "Parses lines with colon, which looks something like:
+  Card ID: item1 `sep` item2 ...
+
+  Splits line's items with `re`, and apply `f` to each item.
+
+  Returns a hash-map: {id1 items1, id2 items2, ...}."
+  [input re f]
+  (->> (str/split-lines input)
+       (reduce (fn [m cline]
+                 (let [[id items] (parse-cline cline re f)]
+                   (assoc m id items)))
+               {})))
 (defn parse-bin [s]
   (Long/parseLong s 2))
 

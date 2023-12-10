@@ -27,9 +27,9 @@
 
 ;; part 1
 (let [can-move? (fn [p1 p2] (<= (- (int p2) (int p1)) 1))]
-  (count (aoc/bfs (partial moves heightmap can-move?)
-                  (:start heightmap)
-                  #(= % (:end heightmap))))) ; 528
+  (count (:route (aoc/bfs (partial moves heightmap can-move?)
+                          (:start heightmap)
+                          #(= % (:end heightmap)))))) ; 528
 
 ;; part 2 (There is a trick, we can do reverse search from goal to the nearest start).
 (let [goal? (reduce-kv (fn [acc loc h]
@@ -37,6 +37,6 @@
                        #{}
                        heightmap)
       can-move? (fn [p1 p2] (<= (- (int p1) (int p2)) 1))]
-  (count (aoc/bfs (partial moves heightmap can-move?)
-                  (:end heightmap)
-                  goal?))) ; 522
+  (count (:route (aoc/bfs (partial moves heightmap can-move?)
+                          (:end heightmap)
+                          goal?)))) ; 522

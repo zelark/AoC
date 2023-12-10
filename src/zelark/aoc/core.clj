@@ -159,16 +159,19 @@
 (defn bfs [graph start goal?]
   (loop [seen  {start nil}
          queue (queue start)]
-    (when-let [current (peek queue)]
+    (if-let [current (peek queue)]
       (if (goal? current)
-        (generate-route current seen)
+        {:status :found
+         :route  (generate-route current seen)}
         (let [[seen queue] (reduce (fn [[seen queue :as acc] node]
                                      (if (contains? seen node)
                                        acc
                                        [(assoc seen node current) (conj queue node)]))
                                    [seen (pop queue)]
                                    (graph current))]
-          (recur seen queue))))))
+          (recur seen queue)))
+      {:status :not-found
+       :seen   (set (keys seen))})))
 
 ;; nubmers and digits
 (defn ch->digit [c]

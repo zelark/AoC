@@ -97,7 +97,9 @@
     (if (= x x') x (recur f x'))))
 
 (defn transpose [v]
-  (apply mapv vector v))
+  (if (string? (first v))
+    (apply mapv str v)
+    (apply mapv vector v)))
 
 (defn rotate
   "Rotates `v` clockwise."

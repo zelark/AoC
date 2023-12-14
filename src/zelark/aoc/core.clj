@@ -99,6 +99,16 @@
 (defn transpose [v]
   (apply mapv vector v))
 
+(defn rotate
+  "Rotates `v` clockwise."
+  [v]
+  (let [h (count v)
+        w (count (first v))]
+    (->> (for [i (range w) j (range h)]
+           (get-in v [(- h j 1) i]))
+         (partition h)
+         (mapv #(apply str %)))))
+
 ;; Grids
 (defn grid-get [grid [x y]]
   (get-in grid [y x]))

@@ -2,7 +2,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.java.shell :as shell]
-            [clojure.edn :as edn])
+            [clojure.edn :as edn]
+            [clojure.data.priority-map :refer [priority-map-keyfn]])
   (:import [clojure.lang PersistentQueue]))
 
 (defn get-input
@@ -93,7 +94,7 @@
   (reduce * 1 xs))
 
 (defn fix-point [f x]
-  (let [x' (f x)]
+   (let [x' (f x)]
     (if (= x x') x (recur f x'))))
 
 (defn transpose [v]
@@ -184,6 +185,39 @@
           (recur seen queue)))
       {:status :not-found
        :seen   (set (keys seen))})))
+
+;; It's a copy from https://github.com/arttuka/astar with a few improvements.
+(defn astar
+  "Finds the shortest route from start to goal in a graph.
+  
+  Params:
+  * `graph` — a function (eg. a map) from nodes to a collection of adjacent nodes.
+  * `dist` — a function from two nodes to the distance (as a number) from the first node to the second.
+  * `h` — a function from a node to the heuristic distance from that node to the goal.
+    It should never overestimate the distance.
+  * `start` — a start node.
+  * `goal?` — a predicate function, if returns `true` the goal is found.
+  * `score?` (optional) if `true` returns `score` if the goal is found.
+  
+  By default returns a list of nodes on the route, excluding the start node and including the goal node.
+  If a route can't be found, returns nil."
+  [graph dist h start goal? & {:keys [score?]}]
+  (loop [visited {}
+         queue (priority-map-keyfn first start [0 0 nil])]
+    (when (seq queue)
+      (let [[current [_ current-score previous]] (peek queue)
+            visited (assoc visited current previous)]
+        (if (goal? current)
+          (if score? current-score (generate-route current visited))
+          (recur visited (reduce (fn [queue node]
+                                   (let [score (+ current-score (dist current node))]
+                                     (if (and (not (contains? visited node))
+                                              (or (not (contains? queue node))
+                                                  (< score (get-in queue [node 1]))))
+                                       (assoc queue node [(+ score (h node)) score current])
+                                       queue)))
+                                 (pop queue)
+                                 (graph current))))))))
 
 ;; nubmers and digits
 (defn ch->digit [c]

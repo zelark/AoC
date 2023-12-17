@@ -4,11 +4,17 @@
             [zelark.aoc.core :as aoc]))
 
 ;; General things
+(def empty-space \.)
+(def empty-space? #{empty-space})
+(def something? (complement empty-space?))
 
-(defn parse [input pred]
+(defn parse 
+  ([input] (parse input identity identity))
+  ([input pred] (parse input pred identity))
+  ([input pred post]
    (->> (str/split-lines input)
         (mapcat (fn [y line] (keep-indexed (fn [x ch] (when (pred ch) [[x y] ch])) line)) (range))
-       (reduce (fn [m [loc ch]] (assoc m loc ch)) {})))
+        (reduce (fn [m [loc ch]] (assoc m loc (post ch))) {}))))
 
 (defn plus [[^long x ^long y] [^long dx ^long dy]]
   [(+ x dx) (+ y dy)])

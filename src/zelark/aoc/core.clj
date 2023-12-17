@@ -69,8 +69,6 @@
   [n]
   (== n 1))
 
-(== 1.0 1)
-
 (defn gcd [a b]
   (if (zero? b) a (recur b (mod a b))))
 
@@ -93,9 +91,11 @@
 (defn mul [xs]
   (reduce * 1 xs))
 
-(defn fix-point [f x]
+(defn fix-point
+  ([f x] (fix-point f identity x))
+  ([f g x]
    (let [x' (f x)]
-    (if (= x x') x (recur f x'))))
+     (if (= (g x) (g x')) x (recur f g x')))))
 
 (defn transpose [v]
   (if (string? (first v))

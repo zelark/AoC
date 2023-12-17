@@ -78,3 +78,14 @@
   (if (straight-line? a b)
     (straight-line-points a b)
     (diagonal-line-points a b)))
+
+
+;; Rotation
+(def rotation-matrix {90  [0  1 -1  0]
+                      180 [-1  0  0 -1]
+                      270 [0 -1  1  0]})
+
+(defn rotate-ccw [[dx dy] angle]
+  (let [[a b c d] (rotation-matrix angle)]
+    [(+ (* dx a) (* dy b))
+     (+ (* dx c) (* dy d))]))

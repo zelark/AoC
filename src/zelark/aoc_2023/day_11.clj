@@ -9,7 +9,7 @@
 (def input (aoc/get-input 2023 11))
 
 (defn spaces [xs x1 x2]
-  (->> (range (min x1 x2) (max x1 x2))
+  (->> (range (inc (min x1 x2)) (max x1 x2))
        (reduce (fn [n x] (if (xs x) n (inc n))) 0)))
 
 (defn solve [input t]

@@ -6,8 +6,8 @@
 ;; General things
 
 (defn parse [input pred]
-  (->> (str/split-lines input)
-       (mapcat (fn [y line] (keep-indexed (fn [x ch] (when (pred ch) [[x y] ch])) line)) (range))
+   (->> (str/split-lines input)
+        (mapcat (fn [y line] (keep-indexed (fn [x ch] (when (pred ch) [[x y] ch])) line)) (range))
        (reduce (fn [m [loc ch]] (assoc m loc ch)) {})))
 
 (defn plus [[^long x ^long y] [^long dx ^long dy]]
@@ -54,10 +54,11 @@
 (defn straight-line? [[x1 y1] [x2 y2]]
   (or (== x1 x2) (== y1 y2)))
 
-(defn straight-line-points [[x1 y1] [x2 y2]]
-  (for [x (aoc/rangex x1 x2)
-        y (aoc/rangex y1 y2)]
-    [x y]))
+(defn straight-line-points [[x1 y1 :as a] [x2 y2 :as b]]
+  (when (straight-line? a b)
+    (for [x (aoc/rangex x1 x2)
+          y (aoc/rangex y1 y2)]
+      [x y])))
 
 (defn diagonal-line-points [[x1 y1] [x2 y2]]
   (map vector (aoc/rangex x1 x2) (aoc/rangex y1 y2)))

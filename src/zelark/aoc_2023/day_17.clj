@@ -20,7 +20,7 @@
                g2/down  [g2/left  g2/right]
                         [g2/right g2/down])] ; Start point is always [0 0].
     (->> (for [d dirs]
-           (->> (iterate (fn [[a b]] [(mapv + a b) b]) [loc d])
+           (->> (iterate (fn [[a b]] [(g2/plus a b) b]) [loc d])
                 (take (inc max))
                 (drop min)))
          (mapcat identity)

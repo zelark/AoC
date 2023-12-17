@@ -4,6 +4,11 @@
             [zelark.aoc.core :as aoc]))
 
 ;; General things
+(def right [+1  0])
+(def left  [-1  0])
+(def up    [0  -1])
+(def down  [0  +1])
+
 (def empty-space \.)
 (def empty-space? #{empty-space})
 (def something? (complement empty-space?))

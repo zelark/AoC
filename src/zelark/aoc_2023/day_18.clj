@@ -12,11 +12,11 @@
   (->> (re-seq #"([UDLR]) (\d+) \(#([0-9a-f]{6})\)" input)
        (map (fn [[_ dir n hex]] [(keyword dir) (parse-long n) hex]))))
 
-(def kw->dir {:R g2/right :D g2/down :L g2/left :U g2/up})
+(def direction {:R g2/right :D g2/down :L g2/left :U g2/up})
 
 (defn trench-points [dig-plan]
   (let [mult (fn [[x y] n] [(* x n) (* y n)])]
-    (reductions (fn [loc [kw n]] (g2/plus loc (mult (kw->dir kw) n)))
+    (reductions (fn [loc [d n]] (g2/plus loc (mult (direction d) n)))
                 [0 0]
                 dig-plan)))
 
@@ -28,8 +28,7 @@
   (map (fn [[_ _ hex]] (-> (str "0x" hex) edn/read-string decode)) dig-plan))
 
 (defn solve [input & {:keys [correct-plan?]}]
-  (let [plan   (parse input)
-        plan   (cond-> plan correct-plan? correct)
+  (let [plan   (cond-> (parse input) correct-plan? correct)
         trench (trench-points plan)
         p      (g2/perimeter-of-polygon trench)
         a      (g2/area-of-polygon trench)]

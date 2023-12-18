@@ -7,10 +7,10 @@
 ;; Without extra g2/functions and even trench-points isn't needed.
 (defn solve [input & {:keys [correct-plan?]}]
   (->> (cond-> (day18/parse input) correct-plan? day18/correct)
-       (reduce (fn [[acc x] [d n]]
-                 (let [[dx dy] (day18/direction d)
-                       x' (+ x (* dx n))]
-                   [(+ acc (* dy n x') (/ n 2)) x']))
+       (reduce (fn [[area x] [dir len]]
+                 (let [[dx dy] (day18/direction dir)
+                       x' (+ x (* dx len))]
+                   [(+ area (* dy len x') (/ len 2)) x']))
                [1 0])
        (first)))
 

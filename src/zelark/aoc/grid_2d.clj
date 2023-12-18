@@ -79,6 +79,27 @@
     (straight-line-points a b)
     (diagonal-line-points a b)))
 
+(defn close-points
+  "Closes a seq of points if it is not.
+
+  ([0 0] [0 5] [5 5]) -> [[0 0] [0 5] [5 5] [0 0]]
+  
+  Returns a vector of the points."
+  [points]
+  (let [points (vec points)
+        [start end] ((juxt first peek) points)]
+    (cond-> points
+      (not= start end) (conj start))))
+
+(defn perimeter-of-polygon [points]
+  (let [points (close-points points)]
+    (reduce + (map aoc/manhattan-distance points (rest points)))))
+
+;; https://en.wikipedia.org/wiki/Shoelace_formula#Triangle_formula
+(defn area-of-polygon [points]
+  (let [sum-diagonals (fn [acc [[x1 y1] [x2 y2]]]
+                        (+ acc (- (* x1 y2) (* x2 y1))))]
+    (abs (/ (reduce sum-diagonals 0 (partition 2 1 points)) 2))))
 
 ;; Rotation
 (def rotation-matrix {90  [0  1 -1  0]

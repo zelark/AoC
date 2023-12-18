@@ -32,8 +32,8 @@
         plan   (cond-> plan correct-plan? correct)
         trench (trench-points plan)
         p      (g2/perimeter-of-polygon trench)
-        s      (g2/area-of-polygon trench)]
-    (- (+ p s) (dec (/ p 2)))))
+        a      (g2/area-of-polygon trench)]
+    (inc (+ a (/ p 2)))))
 
 ;; part 1
 (solve input) ; 48400

@@ -57,11 +57,11 @@
             (if-let [[op r n] rule]
               (condp = op
                 < [(conj acc (-> (assoc cmb :wf to)
-                                 (update-in [r 1] min (dec n)))) ; passed
-                   (update-in cmb [r 0] max n)]                  ; failed
+                                 (assoc-in [r 1] (dec n)))) ; passed
+                   (assoc-in cmb [r 0] n)]                  ; failed
                 > [(conj acc (-> (assoc cmb :wf to)
-                                 (update-in [r 0] max (inc n)))) ; passed
-                   (update-in cmb [r 1] min n)])                 ; failed
+                                 (assoc-in [r 0] (inc n)))) ; passed
+                   (assoc-in cmb [r 1] n)])                 ; failed
               (conj acc (assoc cmb :wf to))))
           [[] comb]
           (workflows (comb :wf))))

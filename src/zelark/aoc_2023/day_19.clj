@@ -1,5 +1,6 @@
 (ns zelark.aoc-2023.day-19
   (:require [zelark.aoc.core :as aoc]
+            [zelark.aoc.range :as r]
             [clojure.string :as str]
             [clojure.edn :as edn]))
 
@@ -56,19 +57,19 @@
   (reduce (fn [[acc cmb] {:keys [to rule]}]
             (if-let [[op r n] rule]
               (condp = op
-                < [(conj acc (-> (assoc cmb :wf to)
-                                 (assoc-in [r 1] (dec n)))) ; passed
-                   (assoc-in cmb [r 0] n)]                  ; failed
-                > [(conj acc (-> (assoc cmb :wf to)
-                                 (assoc-in [r 0] (inc n)))) ; passed
-                   (assoc-in cmb [r 1] n)])                 ; failed
+                < (let [[passed failed] (r/split (cmb r) n)]
+                    [(conj acc (assoc cmb r passed, :wf to))
+                     (assoc cmb r failed)])
+                > (let [[failed passed] (r/split (cmb r) (inc n))]
+                    [(conj acc (assoc cmb r passed, :wf to))
+                     (assoc cmb r failed)]))
               (conj acc (assoc cmb :wf to))))
           [[] comb]
           (workflows (comb :wf))))
 
 (let [{:keys [workflows]} (parse input)
-      combs [{:wf "in" :x [1 4000] :m [1 4000] :a [1 4000] :s [1 4000]}]
-      ln #(inc (- (second %) (first %)))] ; TODO: I need this in my aoc lib.
+      rr    (r/rangel 1 4000)
+      combs [{:wf "in" :x rr :m rr :a rr :s rr}]]
   (->> (loop [combs combs
               res   []]
          (if (seq combs)
@@ -78,5 +79,5 @@
                       (group-by #(case (% :wf) "A" :accepted "R" :rejected :misc)))]
              (recur misc (into res accepted)))
            res))
-       (map (fn [{:keys [x m a s]}] (* (ln x) (ln m) (ln a) (ln s))))
+       (map (fn [{:keys [x m a s]}] (aoc/mul r/length [x m a s])))
        (aoc/sum))) ; 110807725108076

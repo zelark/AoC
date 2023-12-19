@@ -85,11 +85,13 @@
      (range start (inc end))
      (range start (dec end) -1))))
 
-(defn sum [xs]
-  (reduce + 0 xs))
+(defn sum
+  ([xs] (sum identity xs))
+  ([f xs] (reduce #(+ %1 (f %2)) 0 xs)))
 
-(defn mul [xs]
-  (reduce * 1 xs))
+(defn mul
+  ([xs] (mul identity xs))
+  ([f xs] (reduce #(* %1 (f %2)) 1 xs)))
 
 (defn fix-point
   ([f x] (fix-point f identity x))

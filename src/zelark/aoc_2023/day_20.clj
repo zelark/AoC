@@ -92,7 +92,7 @@
 
 (let [config (parse input)
       state  (init-state config)
-      output (get-in config ["broadcaster" :output])
       pushes (iterate #(push-button config %) state)]
-  (->> (map #(find-loop pushes %) output)
+  (->> (get-in config ["broadcaster" :output]) ; flip-flops connected to broadcaster
+       (map #(find-loop pushes %))
        (apply aoc/lcm))) ; 233283622908263

@@ -14,6 +14,8 @@
   (->> (str/split-lines input)
        (mapv parse-line)))
 
+(def disintegrate disj) ; just for fun.
+
 (def x1 (comp first first))
 (def x2 (comp first second))
 
@@ -59,7 +61,7 @@
   (let [bricks  (parse input)
         settled (:bricks (settle-all bricks))]
     (reduce (fn [res brick]
-              (let [bricks (disj settled brick)
+              (let [bricks (disintegrate settled brick)
                     fallen (:fallen (settle-all bricks))]
                 (cond-> res
                   (zero? fallen) (update :part-1 inc)

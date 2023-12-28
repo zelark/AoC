@@ -1,7 +1,7 @@
 (ns zelark.aoc.range
   (:refer-clojure :exclude [range contains?]))
 
-(defrecord Range [start end len]
+(defrecord Range [start end len] 
   Object
   (toString [_] (str [start end])))
 
@@ -13,7 +13,7 @@
   "Creates a range from start (inclusive) to end."
   ([range]
    (cond
-     (vector? range)
+     (sequential? range)
      (rangee (first range) (second range))
      
      (instance? Range range)
@@ -27,69 +27,95 @@
                 :end   end
                 :len   (- end start)})))
 
-(defn rangel [start len]
+(defn rangel
+  "Creates a range with start at start and length len."
+  [start len]
   (rangee start (+ start len)))
 
-(defn contains? [range x]
+;; It would be nice if we can override Clojure `count` for `Range` record.
+;; But seems it is not allowed.
+(defn length
+  "Returns `length` of `range`."
+  [range]
+  (:len range))
+
+(defn shift
+  "Returns a new range shifted by n."
+  [range n]
+  (rangel (+ (:start range) n) (:len range)))
+
+(defn contains?
+  "Returns true if range contains x."
+  [range x]
   (and (<= (:start range) x)
        (< x (:end range))))
 
-(defn split [range n]
+(defn split
+  "Splits range at n."
+  [range n]
   (when (contains? range n)
     (let [{:keys [start end]} range]
       [(rangee start n) (rangee n end)])))
 
-(defn add-offset [range offset]
-  (rangel (+ (:start range) offset)
-          (:len range)))
-
-(defn- exclude-one
-  ([r1 r2]
-   (let [left  (when (< (:start r1) (:start r2))
-                 (rangee (:start r1) (min (:end r1) (:start r2))))
-         right (when (< (:end r2) (:end r1))
-                 (rangee (max (:start r1) (:end r2)) (:end r1)))]
-     [left right])))
-
-(defn exclude [range & ranges]
-  (->> (sort-by :start ranges)
-       (reduce (fn [[acc r1] r2]
-                 (let [[prefix suffix] (exclude-one r1 r2)]
-                   [(cond-> acc prefix (conj prefix)) suffix]))
-               [[] range])
-       (apply conj)))
-
-(defn length [range]
-  (:len range))
-
-(defn intersect-with [r1 r2]
+(defn intersection
+  "Returns a new range, which is an intersection between r1 and r2.
+  Otherwise returns nil."
+  [r1 r2]
   (let [start (max (:start r1) (:start r2))
-        end   (min (:end r2) (:end r2))]
+        end   (min (:end r1) (:end r2))]
     (when (< start end)
       (rangee start end))))
+
+(defn- exclude-one [r1 r2]
+  (let [left  (when (< (:start r1) (:start r2))
+                (rangee (:start r1) (min (:end r1) (:start r2))))
+        right (when (< (:end r2) (:end r1))
+                (rangee (max (:start r1) (:end r2)) (:end r1)))]
+    [left right]))
+
+(defn exclude
+  "Returns a result of exclusion ranges from range.
+
+  Example: result for (exclude [1 10] [2 7]) is [[1 2]] [7 10]]."
+  [range & ranges]
+  (loop [r1     range
+         ranges (sort-by :start ranges)
+         result []]
+    (if (and r1 (first ranges))
+      (let [[prefix suffix] (exclude-one r1 (first ranges))]
+        (recur suffix
+               (rest ranges)
+               (cond-> result prefix (conj prefix))))
+      (cond-> result r1 (conj r1)))))
 
 (comment
   (rangel 1 10) ; => [1 10]
   (rangee 10 1) ; => AssertionError
   
-  (str (rangel 1 10))
-  
-  (add-offset (rangel 1 4000) 10)
+  (shift (rangel 1 4000) 10) ; => [11 4011]
   
   (contains? (rangel 1 10) 10) ; => true
   (contains? (rangee 1 10) 10) ; => false
   
-  (split (rangel 1 4000) 1000)
-  (length (first (split (rangel 1 4000) 4000)))
+  (length (rangel 1 4000)) ; => 4000
   
-  (length (rangel 1 4000))
+  (split (rangel 1 4000) 1000) ; => [[1 1000] [1000 4001]]
+  (length (first (split (rangel 1 4000) 4000))) ; => 3999
   
-  (intersect-with (rangel 1 10)
-                  (rangel 5 12))
-
-  (exclude (rangel 1 9) (rangel 2 5))
-  (exclude (rangel 1 9) (rangel -3 3)) 
-  (exclude (rangel 1 9) (rangel 2 5) (rangel -2 5))
+  (intersection (rangel 1 10) (rangel 5 12)) ; => [5 11]
   
-  (rangee 1)
+  (exclude-one (rangel 1 9) (rangel -3 3)) ; => [nil [1 10]]
+  (exclude-one (rangel 1 9) (rangel -2 5)) ; => [nil [3 10]]
+  (exclude-one (rangel 1 9) (rangel 0 10)) ; => [nil nil]
+  (exclude-one (rangel 1 9) (rangel 2 5))  ; => [[1 2] [7 10]]
+  (exclude-one (rangel 1 9) (rangel 6 7))  ; => [[1 6] nil]
+  (exclude-one (rangel 1 9) (rangel 11 4)) ; => [[1 10] nil]
+  
+  (exclude (rangel 1 9) (rangel -3 3))  ; => [[1 10]]
+  (exclude (rangel 1 9) (rangel -2 5))  ; => [[3 10]]
+  (exclude (rangel 1 9) (rangel 0 10))  ; => []
+  (exclude (rangel 1 9) (rangel 2 5))   ; => [[1 2] [7 10]]
+  (exclude (rangel 1 9) (rangel 6 7))   ; => [[1 6]]
+  (exclude (rangel 1 9) (rangel 11 4))  ; => [[1 10]]
+  
   )

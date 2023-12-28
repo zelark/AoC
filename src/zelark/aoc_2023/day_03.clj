@@ -51,15 +51,11 @@
 
 ;; part 1
 (->> (parse-input input)
-     (reduce (fn [acc {:keys [part-numbers]}]
-               (apply + acc part-numbers))
-             0)) ; 512794
+     (aoc/sum #(-> % :part-numbers aoc/sum))) ; 512794
 
 ;; part 2
 (->> (parse-input input)
      (filter (fn [{:keys [symbol part-numbers]}]
                (and (= symbol "*")
-                    (== (count part-numbers) 2))))
-     (reduce (fn [acc {:keys [part-numbers]}]
-               (+ acc (apply * part-numbers)))
-             0)) ; 67779080
+                    (aoc/len part-numbers = 2))))
+     (aoc/sum #(-> % :part-numbers aoc/mul))) ; 67779080

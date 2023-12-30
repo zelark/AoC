@@ -100,7 +100,9 @@
 
 (defn transpose [v]
   (if (string? (first v))
-    (apply mapv str v)
+    (let [i (count v)]
+      (for [j (range 0 i)]
+        (str/join (mapv (fn [^String s] (.charAt s j)) v))))
     (apply mapv vector v)))
 
 ;; Grids

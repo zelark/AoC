@@ -61,7 +61,7 @@
 ;; yi = v1*t1 + y1 = vr*t1 + yr
 ;; xj = u2*t2 + x2 = ur*t2 + xr
 ;; yj = v2*t2 + y2 = vr*t2 + yr
-;; After a few transforamtion we will get an quationt for t1 (below).
+;; After a few transformation we will get an equation for t1 (below).
 
 ;; (61.796851 msecs)
 (let [hailstones (parse input)

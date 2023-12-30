@@ -92,6 +92,19 @@
 (defn len [coll cmp limit]
   (cmp (count coll) limit))
 
+(defn cnt
+  "Returns the number of elements in coll."
+  [coll el]
+  (if (string? coll)
+    (let [^String s coll
+          ^Character ch el
+          len (count coll)]
+      (loop [n 0, i 0]
+        (if (< i len)
+          (recur (if (= (.charAt s i) ch) (unchecked-inc n) n) (unchecked-inc i))
+          n)))
+    (reduce (fn [n item] (if (= item el) (inc n) n)) 0 coll)))
+
 (defn fix-point
   ([f x] (fix-point f identity x))
   ([f g x]

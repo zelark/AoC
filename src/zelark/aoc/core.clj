@@ -20,10 +20,6 @@
 (defn queue [& args]
   (into PersistentQueue/EMPTY args))
 
-(defn index-by
-  [f coll]
-  (persistent! (reduce #(assoc! %1 (f %2) %2) (transient {}) coll)))
-
 ;; Parsing
 (defn parse-longs [s]
   (->> (re-seq #"-?\d+" s)
@@ -106,16 +102,6 @@
   (if (string? (first v))
     (apply mapv str v)
     (apply mapv vector v)))
-
-(defn rotate
-  "Rotates `v` clockwise."
-  [v]
-  (let [h (count v)
-        w (count (first v))]
-    (->> (for [i (range w) j (range h)]
-           (get-in v [(- h j 1) i]))
-         (partition h)
-         (mapv #(apply str %)))))
 
 ;; Grids
 (defn grid-get [grid [x y]]

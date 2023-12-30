@@ -34,8 +34,8 @@
         a      (g2/area-of-polygon trench)]
     (inc (+ a (/ p 2)))))
 
-;; part 1
+;; part 1 (7.222099 msecs)
 (solve input) ; 48400
 
-;; part 2
+;; part 2 (10.61384 msecs)
 (solve input :correct-plan? true) ; 72811019847283

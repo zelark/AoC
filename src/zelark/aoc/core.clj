@@ -111,12 +111,19 @@
    (let [x' (f x)]
      (if (= (g x) (g x')) x (recur f g x')))))
 
+;; Pivots
 (defn transpose [v]
   (if (string? (first v))
     (let [i (count v)]
       (for [j (range 0 i)]
         (str/join (mapv (fn [^String s] (.charAt s j)) v))))
     (apply mapv vector v)))
+
+(defn rotate-cw [x]
+  (-> x reverse transpose))
+
+(defn rotate-ccw [x]
+  (-> x transpose reverse))
 
 ;; Grids
 (defn grid-get [grid [x y]]

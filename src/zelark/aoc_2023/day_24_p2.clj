@@ -49,7 +49,7 @@
 
 (defn find-rock-velocity [axis hailstones]
   (let [v+group (->> (group-by #(-> % :vel axis) hailstones)
-                     (filter (fn [[_ group]] (aoc/cnt group >= 2))))]
+                     (filter (fn [[_ group]] (aoc/len group >= 2))))]
     (-> (reduce-kv (fn [vs v group]
                      (let [diffs (pos-diffs group axis)]
                        (filter #(valid-candidate? (- % v) diffs) vs)))

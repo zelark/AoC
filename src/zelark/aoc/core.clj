@@ -93,7 +93,7 @@
   ([xs] (mul identity xs))
   ([f xs] (reduce #(* %1 (f %2)) 1 xs)))
 
-(defn cnt [coll cmp limit]
+(defn len [coll cmp limit]
   (cmp (count coll) limit))
 
 (defn fix-point

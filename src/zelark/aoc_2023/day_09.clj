@@ -16,16 +16,13 @@
   (->> (reverse orig-seq)
        (iterate (fn [xs] (map - xs (rest xs))))
        (mdl/take-upto #(every? zero? %))
-       (map first)
-       (reduce (fn [acc n] (+ n acc)))))
+       (aoc/sum first)))
 
-;; part 1
+;; part 1 (8.826545 msecs)
 (->> (parse-input input)
-     (map extrapolate)
-     (aoc/sum)) ; 1782868781
+     (aoc/sum extrapolate)) ; 1782868781
 
-;; part 2
+;; part 2 (8.690005 msecs)
 (->> (parse-input input)
      (map reverse)
-     (map extrapolate)
-     (aoc/sum)) ; 1057
+     (aoc/sum extrapolate)) ; 1057

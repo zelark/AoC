@@ -20,7 +20,7 @@
        (map prepare-game)
        (reduce f 0)))
 
-;; part 1
+;; part 1 (4.826349 msecs)
 (defn possible?
   "Only 12 red cubes, 13 green cubes, and 14 blue cubes."
   [{:keys [red green blue] :or {red 0 green 0 blue 0}}]
@@ -33,7 +33,7 @@
 
 (solve part1 input) ; 2076
 
-;; part 2
+;; part 2 (3.080426 msecs)
 (defn part2 [acc [_ cubes]]
   (+ acc (apply * (vals cubes))))
 

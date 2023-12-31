@@ -29,10 +29,10 @@
                 (+ (* a 10) b))))
        (aoc/sum)))
 
-;; part 1
+;; part 1 (3.031089 msecs)
 (let [pattern #"(\d)"]
   (solve (find-digits pattern) input)) ; 54239
 
-;; part 2
+;; part 2 (32.813569 msecs)
 (let [pattern #"(?=(\d|one|two|three|four|five|six|seven|eight|nine))"]
   (solve (find-digits pattern) input)) ; 55343

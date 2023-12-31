@@ -49,11 +49,11 @@
                      g
                      g))))
 
-;; part 1
+;; part 1 (55.646604 msecs)
 (->> (parse-input input)
      (aoc/sum #(-> % :part-numbers aoc/sum))) ; 512794
 
-;; part 2
+;; part 2 (47.995458 msecs)
 (->> (parse-input input)
      (filter (fn [{:keys [symbol part-numbers]}]
                (and (= symbol "*")

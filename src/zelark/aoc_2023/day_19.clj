@@ -32,7 +32,7 @@
                      (reduce (fn [m [name rules]] (assoc m name rules)) {}))
      :parts     (map ->part (str/split-lines parts))}))
 
-;; part 1
+;; part 1 (19.273476 msecs)
 (defn apply-rules [rules part]
   (some (fn [{:keys [to rule]}]
           (if-let [[op rating n] rule]
@@ -52,7 +52,7 @@
   (->> (filter #(accepted? workflows %) parts)
        (reduce (fn [acc {:keys [x m a s]}] (+ acc x m a s)) 0))) ; 319295
 
-;; part 2
+;; part 2 (28.465524 msecs)
 (defn walk [workflows comb]
   (reduce (fn [[acc cmb] {:keys [to rule]}]
             (if-let [[op r n] rule]

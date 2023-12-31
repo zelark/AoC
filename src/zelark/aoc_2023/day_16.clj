@@ -68,12 +68,12 @@
          (first)
          (:heat-map))))
 
-;; part 1
+;; part 1 (51.177529 msecs)
 (let [layout (g2/parse input)
       beam   {:direction g2/right :loc [-1 0]}]
   (count (energized-tiles layout beam))) ; 6902
 
-;; part 2
+;; part 2 (1372.487222 msecs)
 (let [layout (g2/parse input)
       [[x1 y1] [x2 y2]] (g2/extend-boundaries (g2/boundaries layout))]
   (->> (concat (for [y* (range (inc y1) y2)] {:loc [x1 y*] :direction g2/right})
@@ -84,14 +84,15 @@
        (apply max))) ; 7697
 
 ;; ascii visualization (part 1)
-(let [dir->ch {g2/right \>, g2/left \<, g2/up \^, g2/down \v}
-      layout  (g2/parse input)
-      beam    {:direction g2/right :loc [-1 0]}]
-  (->> (energized-tiles layout beam)
-       (reduce-kv (fn [lt k v]
-                    (let [n (count v)]
-                      (if (g2/empty-space? (lt k))
-                        (if (aoc/one? n) (assoc lt k (dir->ch (first v))) (assoc lt k n))
-                        lt)))
-                  layout)
-       (aoc/print-points-2)))
+(comment
+  (let [dir->ch {g2/right \>, g2/left \<, g2/up \^, g2/down \v}
+        layout  (g2/parse input)
+        beam    {:direction g2/right :loc [-1 0]}]
+    (->> (energized-tiles layout beam)
+         (reduce-kv (fn [lt k v]
+                      (let [n (count v)]
+                        (if (g2/empty-space? (lt k))
+                          (if (aoc/one? n) (assoc lt k (dir->ch (first v))) (assoc lt k n))
+                          lt)))
+                    layout)
+         (aoc/print-points-2))))

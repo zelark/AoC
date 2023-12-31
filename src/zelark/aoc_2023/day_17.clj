@@ -36,8 +36,8 @@
         next-blocks #(next-blocks city-map min max %)]
     (aoc/astar next-blocks dist h start goal? {:score? true})))
 
-;; part 1
+;; part 1 (2248.186001 msecs)
 (solve input 1 3) ; 1008
 
-;; part 2
+;; part 2 (6650.171768 msecs)
 (solve input 4 10) ; 1210

@@ -17,12 +17,12 @@
 (defn hash [s]
   (reduce (fn [hsh ch] (rem (* (+ hsh (int ch)) 17) 256)) 0 s))
 
-;; part 1
+;; part 1 (4.606951 msecs)
 (->> (str/split input #",")
      (map hash)
      (aoc/sum)) ; 512283
 
-;; part 2
+;; part 2 (12.344608 msecs)
 (defn step [boxes [op label flen]]
   (let [n   (hash label)
         box (boxes n (array-map))]

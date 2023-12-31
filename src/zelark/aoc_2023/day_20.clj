@@ -76,7 +76,7 @@
              (with-meta {} {:pulses {low 0 high 0} :times 0})
              config))
 
-;; part 1
+;; part 1 (86.967126 msecs)
 (let [config (parse input)
       state  (->> (iterate #(push-button config %) (init-state config))
                   (drop 1000)
@@ -84,7 +84,7 @@
       pulses (-> state meta :pulses)]
   (aoc/mul val pulses)) ; 886347020
 
-;; part 2
+;; part 2 (289.383215 msecs)
 (defn find-loop [pushes ff-module]
   (->> (map #(-> {:times (:times (meta %)) :val (% ff-module)}) pushes)
        (partition 2 1)

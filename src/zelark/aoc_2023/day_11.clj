@@ -26,7 +26,7 @@
          (aoc/sum))))
 
 ;; part 1 (397.999698 msecs)
-(time (solve input 2)) ; 9608724
+(solve input 2) ; 9608724
 
 ;; part 2 (391.411097 msecs)
-(time (solve input 1000000)) ; 904633799472
+(solve input 1000000) ; 904633799472

@@ -1,4 +1,5 @@
 (ns zelark.aoc.core
+  (:refer-clojure :exclude [min max])
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [clojure.java.shell :as shell]
@@ -19,6 +20,13 @@
 
 (defn queue [& args]
   (into PersistentQueue/EMPTY args))
+
+(defn rangex
+  ([] ())
+  ([^long start ^long end]
+   (if (<= start end)
+     (range start (inc end))
+     (range start (dec end) -1))))
 
 ;; Parsing
 (defn parse-longs [s]
@@ -74,20 +82,28 @@
   ([a b] (/ (* a b) (gcd a b)))
   ([a b & rst] (reduce lcm (lcm a b) rst)))
 
-(defn rangex
-  ([] ())
-  ([^long start ^long end]
-   (if (<= start end)
-     (range start (inc end))
-     (range start (dec end) -1))))
+(defn fix-point
+  ([f x] (fix-point f identity x))
+  ([f g x]
+   (let [x' (f x)]
+     (if (= (g x) (g x')) x (recur f g x')))))
 
+;; Collections
 (defn sum
-  ([xs] (sum identity xs))
+  ([xs]   (reduce + 0 xs))
   ([f xs] (reduce #(+ %1 (f %2)) 0 xs)))
 
 (defn mul
-  ([xs] (mul identity xs))
+  ([xs]   (reduce * 1 xs))
   ([f xs] (reduce #(* %1 (f %2)) 1 xs)))
+
+(defn max
+  ([xs]   (apply clojure.core/max xs))
+  ([f xs] (apply clojure.core/max (map f xs))))
+
+(defn min
+  ([xs]   (apply clojure.core/min xs))
+  ([f xs] (apply clojure.core/min (map f xs))))
 
 (defn len [coll cmp limit]
   (cmp (count coll) limit))
@@ -104,12 +120,6 @@
           (recur (if (= (.charAt s i) ch) (unchecked-inc n) n) (unchecked-inc i))
           n)))
     (reduce (fn [n item] (if (= item el) (inc n) n)) 0 coll)))
-
-(defn fix-point
-  ([f x] (fix-point f identity x))
-  ([f g x]
-   (let [x' (f x)]
-     (if (= (g x) (g x')) x (recur f g x')))))
 
 ;; Pivots
 (defn transpose [v]
@@ -141,8 +151,8 @@
   (assoc-in grid [y x] v))
 
 (defn print-points [points]
-  (let [max-x (apply max (map first points))
-        max-y (apply max (map second points))]
+  (let [max-x (max first points)
+        max-y (max second points)]
     (-> (reduce #(mark-point %1 %2 \#)
                 (empty-grid (inc max-x) (inc max-y))
                 points)
@@ -150,10 +160,10 @@
 
 (defn print-points-2 [loc->ch]
   (let [points (keys loc->ch)
-        max-x  (apply max (map first points))
-        max-y  (apply max (map second points))
-        min-x  (apply min (map first points))
-        min-y  (apply min (map second points))
+        max-x  (max first points)
+        max-y  (max second points)
+        min-x  (min first points)
+        min-y  (min second points)
         off-x  min-x
         off-y  min-y
         grid   (empty-grid (count (range min-x (inc max-x)))
@@ -174,7 +184,7 @@
 
 (set! *warn-on-reflection* true)
 
-;; path finding
+;; search and path finding
 (defn- generate-route [node came-from]
   (loop [route ()
          node node]

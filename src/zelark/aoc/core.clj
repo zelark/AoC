@@ -192,23 +192,6 @@
       (recur (cons node route) (came-from node))
       route)))
 
-(defn bfs [graph start goal?]
-  (loop [seen  {start nil}
-         queue (queue start)]
-    (if-let [current (peek queue)]
-      (if (goal? current)
-        {:status :found
-         :route  (generate-route current seen)}
-        (let [[seen queue] (reduce (fn [[seen queue :as acc] node]
-                                     (if (contains? seen node)
-                                       acc
-                                       [(assoc seen node current) (conj queue node)]))
-                                   [seen (pop queue)]
-                                   (graph current))]
-          (recur seen queue)))
-      {:status :not-found
-       :seen   (set (keys seen))})))
-
 ;; It's a copy from https://github.com/arttuka/astar with a few improvements.
 (defn astar
   "Finds the shortest route from start to goal in a graph.

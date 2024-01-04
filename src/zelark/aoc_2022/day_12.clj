@@ -1,5 +1,6 @@
 (ns zelark.aoc-2022.day-12
   (:require [zelark.aoc.core :as aoc]
+            [zelark.aoc.graph :as g]
             [clojure.string :as str]))
 
 ;; --- Day 12: Hill Climbing Algorithm ---
@@ -27,9 +28,11 @@
 
 ;; part 1
 (let [can-move? (fn [p1 p2] (<= (- (int p2) (int p1)) 1))]
-  (count (:route (aoc/bfs (partial moves heightmap can-move?)
-                          (:start heightmap)
-                          #(= % (:end heightmap)))))) ; 528
+  (->> (g/bfs (partial moves heightmap can-move?)
+              (:start heightmap)
+              (:end heightmap))
+       (count)
+       (dec))) ; 528
 
 ;; part 2 (There is a trick, we can do reverse search from goal to the nearest start).
 (let [goal? (reduce-kv (fn [acc loc h]
@@ -37,6 +40,8 @@
                        #{}
                        heightmap)
       can-move? (fn [p1 p2] (<= (- (int p1) (int p2)) 1))]
-  (count (:route (aoc/bfs (partial moves heightmap can-move?)
-                          (:end heightmap)
-                          goal?)))) ; 522
+  (->> (g/bfs (partial moves heightmap can-move?)
+              (:end heightmap)
+              goal?)
+       (count)
+       (dec))) ; 522

@@ -9,80 +9,50 @@
 
 (defn parse [input]
   (->> (aoc/split-on-blankline input)
-       (map (fn [pattern] (map vec (str/split-lines pattern))))))
+       (map #(str/split-lines %))))
 
-(defn reflection? [pattern i j]
-  (let [a (nth pattern i nil)
-        b (nth pattern j nil)]
-    (or (not a)
-        (not b)
-        (and (= a b)
-             (reflection? pattern (dec i) (inc j))))))
+;; 1 #...##..# 1
+;; 2 #....#..# 2
+;; 3 ..##..### 3
+;; 4v#####.##.v4
+;; 5^#####.##.^5
+;; 6 ..##..### 6
+;; 7 #....#..# 7
 
-(defn find-reflection [pattern k]
-  (when-let [found (->> (partition 2 1 pattern)
-                        (reduce (fn [state [a b]]
-                                  (if (= a b)
-                                    (-> state
-                                        (update :n inc)
-                                        (update :found conj (:n state)))
-                                    (update state :n inc)))
-                                {:n 0 :found []})
-                        (:found)
-                        (seq))]
-    (when-let [found (some #(when (reflection? pattern % (inc %)) %) found)]
-      [k (inc found)])))
+;; This pattern reflects across the horizontal line between rows 4 and 5.
+;; Row 1 would reflect with a hypothetical row 8, but since that's not in the
+;; pattern, row 1 doesn't need to match anything. The remaining rows match:
+;; row 2 matches row 7, row 3 matches row 6, and row 4 matches row 5.
 
-(defn summarize [cols rows]
-  (+ cols (* rows 100)))
+(defn horizontal-line [mirror? pattern]
+  (loop [lines (rest pattern)
+         state (take 1 pattern)]
+    (when (seq lines)
+      (if (mirror? lines state)
+        (count state)
+        (recur (rest lines)
+               (cons (first lines) state))))))
 
-(defn solve [f input]
+(defn vertical-line [mirror? pattern]
+  (horizontal-line mirror? (aoc/transpose pattern)))
+
+(defn mirror? [a b]
+  (= (take (count a) b)
+     (take (count b) a)))
+
+(defn mirror-w-smudge? [a b]
+  (let [a (str/join (take (count b) a))
+        b (str/join (take (count a) b))]
+    (aoc/one? (reduce + (map #(if (= %1 %2) 0 1) a b)))))
+
+(defn solve [mirror? input]
   (->> (parse input)
-       (map (fn [p]
-              (or (f p :rows)
-                  (f (aoc/transpose p) :cols))))
-       (reduce (fn [[c r] [k n]]
-                 (case k
-                   :cols [(+ c n) r]
-                   :rows [c (+ r n)]))
-               [0 0])
-       (apply summarize)))
+       (reduce (fn [acc pattern]
+                 (+ acc (or (vertical-line mirror? pattern)
+                            (* 100 (horizontal-line mirror? pattern))))) 0)))
 
+;; part 1 (5.411 msecs)
+(time (solve mirror? input)) ; 27300
 
-;; part 1
-(solve find-reflection input) ; 27300
-
-;; part 2
-(defn diff-by-one? [a b]
-  (and (== (count a) (count b))
-       (->> (map compare a b)
-            (reduce (fn [d n] (if (not (zero? n)) (inc d) d)) 0)
-            (contains? #{1}))))
-
-(defn reflection?-2 [pattern i j smudge]
-  (let [a (nth pattern i nil)
-        b (nth pattern j nil)]
-    (or (and (not a) (aoc/one? smudge))
-        (and (not b) (aoc/one? smudge))
-        (and (= a b)
-             (reflection?-2 pattern (dec i) (inc j) smudge))
-        (and (diff-by-one? a b)
-             (zero? smudge)
-             (reflection?-2 pattern (dec i) (inc j) 1)))))
-
-(defn find-reflection-2 [pattern k]
-  (when-let [found (->> (partition 2 1 pattern)
-                        (reduce (fn [state [a b]]
-                                  (if (or (= a b)
-                                          (diff-by-one? a b))
-                                    (-> state
-                                        (update :n inc)
-                                        (update :found conj (:n state)))
-                                    (update state :n inc)))
-                                {:n 0 :found []})
-                        (:found)
-                        (seq))]
-    (when-let [found (some #(when (reflection?-2 pattern % (inc %) 0) %) found)]
-      [k (inc found)])))
-
-(solve find-reflection-2 input) ; 29276
+;; part 2 (16.287 msecs)
+(time (solve mirror-w-smudge? input)) ; 29276

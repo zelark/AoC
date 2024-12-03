@@ -7,9 +7,16 @@
             [clojure.data.priority-map :refer [priority-map-keyfn]])
   (:import [clojure.lang PersistentQueue]))
 
+(set! *warn-on-reflection* true)
+
+;; About inputs
+;; https://clojurians.slack.com/archives/C0GLTDB2T/p1701762545148749
+
 (defn get-input
-  ([year day & {:keys [fetch?]}]
-   (let [path-to-file (format "%d/input_%02d.txt" year day)
+  ([year day & {:keys [fetch? suffix]}]
+   (let [path-to-file (if suffix
+                        (format "%d/input_%02d_%s.txt" year day (name suffix))
+                        (format "%d/input_%02d.txt" year day))
          load-input #(-> % io/resource slurp str/trim-newline)]
      (if (or (not (io/resource path-to-file))
              fetch?)

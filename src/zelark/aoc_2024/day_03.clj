@@ -8,8 +8,8 @@
 (def input (aoc/get-input 2024 3))
 
 (defn parse-input [input]
-  (->> (re-seq #"mul(\(\d+,\d+\))" input)
-       (map (fn [[_ args]] (aoc/parse-longs args)))))
+  (->> (re-seq #"mul\(\d+,\d+\)" input)
+       (map #(aoc/parse-longs %))))
 
 (defn solve [input]
   (->> (parse-input input)

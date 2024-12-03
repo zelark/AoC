@@ -115,6 +115,12 @@
 (defn len [coll cmp limit]
   (cmp (count coll) limit))
 
+(defn remove-nth [coll n]
+  (if (zero? n)
+    (rest coll)
+    (concat (take n coll)
+            (drop (inc n) coll))))
+
 (defn cnt
   "Returns the number of elements in coll."
   [coll el]

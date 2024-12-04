@@ -124,7 +124,8 @@
 (defn cnt
   "Returns the number of elements in coll."
   [coll el]
-  (if (string? coll)
+  (cond
+    (string? coll)
     (let [^String s coll
           ^Character ch el
           len (count coll)]
@@ -132,6 +133,10 @@
         (if (< i len)
           (recur (if (= (.charAt s i) ch) (unchecked-inc n) n) (unchecked-inc i))
           n)))
+    (map? coll)
+    (reduce-kv (fn [n _ v] (if (= v el) (inc n) n)) 0 coll)
+    
+    :else
     (reduce (fn [n item] (if (= item el) (inc n) n)) 0 coll)))
 
 ;; Pivots

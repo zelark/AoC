@@ -35,8 +35,7 @@
 ;; part 2 (91.289061 msecs)
 (defn mas-locs [[x y]]
   (for [dx [-1 1]
-        dy [-1 1]
-        :when (not= 0 dx dy)]
+        dy [-1 1]]
     [[(+ x dx) (+ y dy)]
      [(+ x dx dx) (+ y dy dy)]]))
 

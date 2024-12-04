@@ -14,14 +14,14 @@
   (for [dx [-1 0 1]
         dy [-1 0 1]
         :when (not= 0 dx dy)]
-    [[(+ x dx) (+ y dy)]
-     [(+ x dx dx) (+ y dy dy)]
+    [[(+ x dx)       (+ y dy)]
+     [(+ x dx dx)    (+ y dy dy)]
      [(+ x dx dx dx) (+ y dy dy dy)]]))
 
 (defn letters [grid locs]
   (map grid locs))
 
-;; part 1 (79.665425 msecs)
+;; part 1 (91.405143 msecs)
 (let [grid (parse-input input)]
   (reduce-kv (fn [acc loc ch]
                (if (= ch \X)
@@ -32,24 +32,21 @@
              0
              grid)) ; 2427
 
-;; part 2 (91.289061 msecs)
+;; part 2 (81.531023 msecs)
 (defn mas-locs [[x y]]
   (for [dx [-1 1]
         dy [-1 1]]
-    [[(+ x dx) (+ y dy)]
+    [[(+ x dx)    (+ y dy)]
      [(+ x dx dx) (+ y dy dy)]]))
 
 (let [grid (parse-input input)]
   (-> (reduce-kv (fn [acc loc ch]
                    (if (= ch \M)
                      (->> (mas-locs loc)
-                          (map #(-> [(first %) (letters grid %)]))
-                          (filter #(= (second %) [\A \S]))
-                          (map first)
+                          (keep #(when (= (letters grid %) [\A \S]) (first %)))
                           (into acc))
                      acc))
                  []
                  grid)
       (frequencies)
-      (vals)
       (aoc/cnt 2))) ; 1900

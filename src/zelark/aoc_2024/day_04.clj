@@ -7,9 +7,6 @@
 
 (def input (aoc/get-input 2024 4))
 
-(defn parse-input [input]
-  (g2/parse input))
-
 (defn xmas-locs [[x y]]
   (for [dx [-1 0 1]
         dy [-1 0 1]
@@ -22,7 +19,7 @@
   (map grid locs))
 
 ;; part 1 (91.405143 msecs)
-(let [grid (parse-input input)]
+(let [grid (g2/parse input)]
   (reduce-kv (fn [acc loc ch]
                (if (= ch \X)
                  (-> (map #(letters grid %) (xmas-locs loc))
@@ -39,7 +36,7 @@
     [[(+ x dx)    (+ y dy)]
      [(+ x dx dx) (+ y dy dy)]]))
 
-(let [grid (parse-input input)]
+(let [grid (g2/parse input)]
   (-> (reduce-kv (fn [acc loc ch]
                    (if (= ch \M)
                      (->> (mas-locs loc)

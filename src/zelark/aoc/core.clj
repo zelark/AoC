@@ -121,6 +121,15 @@
     (concat (take n coll)
             (drop (inc n) coll))))
 
+(defn middle
+  "Returns a middle item from coll."
+  [coll]
+  {:pre [(odd? (count coll))]}
+  (let [idx (quot (count coll) 2)]
+    (if (vector? coll)
+      (nth coll idx)
+      (nth (seq coll) idx))))
+
 (defn cnt
   "Returns the number of elements in coll."
   [coll el]

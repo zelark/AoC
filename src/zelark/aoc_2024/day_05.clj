@@ -19,13 +19,10 @@
                    (mapv aoc/parse-longs))}))
 
 ;; part 1 (6.065864 msecs)
-(defn correct-order? [rules pages]
-  (boolean (reduce (fn [prev current]
-                     (if (some prev (rules current))
-                       (reduced false)
-                       (conj prev current)))
-                   #{}
-                   pages)))
+(defn correct-order? [rules [current & left-pages]]
+  (or (empty? left-pages)
+      (and (not-any? #((rules % #{}) current) left-pages)
+           (recur rules left-pages))))
 
 (let [{:keys [rules updates]} (parse-input input)]
   (->> (filter #(correct-order? rules %) updates)

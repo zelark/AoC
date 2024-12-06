@@ -12,6 +12,7 @@
 (def empty-space \.)
 (def empty-space? #{empty-space})
 (def something? (complement empty-space?))
+(defn any-but [ch] (complement #{ch}))
 
 (defn parse 
   ([input] (parse input identity identity))
@@ -23,6 +24,9 @@
 
 (defn plus [[^long x ^long y] [^long dx ^long dy]]
   [(+ x dx) (+ y dy)])
+
+(defn minus [[^long x ^long y] [^long dx ^long dy]]
+  [(- x dx) (- y dy)])
 
 (defn neighbors [[x y]]
   (for [[dx dy] [[-1  0] [1 0]
@@ -41,6 +45,11 @@
         [min-y max-y] (apply (juxt min max) (map second points))]
     [[min-x min-y]
      [max-x max-y]]))
+
+(defn center [grid]
+  (->> (boundaries grid)
+       (second)
+       (mapv #(quot % 2))))
 
 (defn extend-boundaries [[lower upper]]
   [(mapv dec lower)
@@ -102,11 +111,18 @@
     (abs (/ (reduce sum-diagonals 0 (partition 2 1 points)) 2))))
 
 ;; Rotation
+;; https://en.wikipedia.org/wiki/Rotation_matrix#Common_2D_rotations
 (def rotation-matrix {90  [0  1 -1  0]
                       180 [-1  0  0 -1]
                       270 [0 -1  1  0]})
 
-(defn rotate-ccw [[dx dy] angle]
+(defn rotate-ccw [[^long dx ^long dy] angle]
   (let [[a b c d] (rotation-matrix angle)]
     [(+ (* dx a) (* dy b))
      (+ (* dx c) (* dy d))]))
+
+(defn turn [direction xy]
+  (case direction
+    :right (rotate-ccw xy 270)
+    :left  (rotate-ccw xy 90)
+    :back  (rotate-ccw xy 180)))

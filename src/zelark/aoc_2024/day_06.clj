@@ -31,51 +31,31 @@
        (take-while some?)))
 
 ;; part 1 (23.453246 msecs)
-(time (let [grid        (g2/parse input)
-            [start dir] (find-guard grid)]
-        (->> (guard-path small-step (assoc grid start g2/empty-space) [start dir])
-             (into #{} (map first))
-             (count)))) ; 5242
+(let [grid        (g2/parse input)
+      [start dir] (find-guard grid)]
+  (->> (guard-path small-step (assoc grid start g2/empty-space) [start dir])
+       (into #{} (map first))
+       (count))) ; 5242
 
-(defn debug [grid path]
-  (-> (reduce (fn [m [pos]] (assoc m pos \x)) grid path)
-      (aoc/print-points-2)))
-
-;; part 2 (6360.225645 msecs)
+;; part 2 (924.266514 msecs)
 (defn in-a-loop? [grid [start dir] block-position]
   (let [grid' (assoc grid block-position \O)]
     (->> (guard-path big-step grid' [start dir])
          (drop 1)
-         #_(reduce #(if (%1 %2) (reduced true) (conj! %1 %2)) (transient #{}))
-         (reduce #(if (%1 %2) (reduced true) (conj %1 %2)) #{})
+         (reduce #(if (%1 %2) (reduced true) (conj %1 %2)) #{}) ; contains? works slower.
          (true?))))
 
-;; 16071.819368 msecs
-;; 7152.590738 msecs
-(time (let [grid        (g2/parse input)
-            [start dir] (find-guard grid)
-            grid        (assoc grid start g2/empty-space)
-            positions   (->> (guard-path small-step grid [start dir])
-                             (into #{} (map first)))]
-        (->> (map #(in-a-loop? grid [start dir] %) (disj positions start))
-             (filter true?)
-             (count)))) ; 1424
-
-;; 16071.819368 msecs
-;; 4646.135041 msecs
-;; 3645.085527 msecs
-;; 1954.627387 msecs
-(time (let [grid        (g2/parse input)
-            [start dir] (find-guard grid)
-            grid        (assoc grid start g2/empty-space)
-            path        (->> (guard-path small-step grid [start dir])
-                             (reduce (fn [[acc seen] [pos dir]]
-                                       (if (seen pos)
-                                         [acc seen]
-                                         [(conj acc [pos dir]) (conj seen pos)]))
-                                     [[] #{}])
-                             (first))]
-        (->> (rest path)
-             (pmap (fn [[pos dir]] (in-a-loop? grid [(g2/minus pos dir) dir] pos)))
-             (filter true?)
-             (count))))
+(let [grid        (g2/parse input)
+      [start dir] (find-guard grid)
+      grid        (assoc grid start g2/empty-space)
+      path        (->> (guard-path small-step grid [start dir])
+                       (reduce (fn [[acc seen] [pos dir]]
+                                 (if (seen pos)
+                                   [acc seen]
+                                   [(conj acc [pos dir]) (conj seen pos)]))
+                               [[] #{}])
+                       (first))]
+  (->> (rest path)
+       (pmap (fn [[pos dir]] (in-a-loop? grid [(g2/minus pos dir) dir] pos))) ; Cut guard's path.
+       (filter true?)
+       (count)))  ; 1424

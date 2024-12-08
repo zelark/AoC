@@ -28,17 +28,17 @@
 
 ;; part 1 (7.379424 msecs)
 (defn part1 [in-bounds? [a b]]
-  (let [[dx dy] (g2/minus a b)]
-    (->> [(g2/plus a [dx dy]) (g2/minus b [dx dy])]
+  (let [delta (g2/minus a b)]
+    (->> [(g2/plus a delta) (g2/minus b delta)]
          (filter in-bounds?))))
 
 (solve part1 input) ; 329
 
 ;; part 2 (9.424784 msecs)
 (defn part2 [in-bounds? [a b]]
-  (let [[dx dy] (g2/minus a b)]
+  (let [delta (g2/minus a b)]
     (concat
-     (take-while in-bounds? (iterate #(g2/plus  % [dx dy]) a))
-     (take-while in-bounds? (iterate #(g2/minus % [dx dy]) b)))))
+     (take-while in-bounds? (iterate #(g2/plus  % delta) a))
+     (take-while in-bounds? (iterate #(g2/minus % delta) b)))))
 
 (solve part2 input) ; 1190

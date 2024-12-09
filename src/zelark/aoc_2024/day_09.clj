@@ -6,22 +6,21 @@
 
 (def input (aoc/get-input 2024 9))
 
-(defn span [n] (vec (repeat n \.)))
+(defn free-space [n] (vec (repeat n :free)))
 
 (defn parse-input [input]
-  (let [ids (->> (cycle [:space])
+  (let [ids (->> (cycle [:free])
                  (interleave (range)))]
     (->> (map (fn [id n]
-                (if (= id :space)
-                  (span n)
+                (if (= id :free)
+                  (free-space n)
                   (vec (repeat n id))))
               ids (map aoc/ch->digit input))
          (remove empty?)
          (vec))))
 
 (defn calc-checksum [disk]
-  (->> (keep-indexed (fn [pos id] (when (number? id)
-                                    (* pos id))) disk)
+  (->> (keep-indexed (fn [pos id] (when (number? id) (* pos id))) disk)
        (aoc/sum)))
 
 (defn place-file [blocks file]
@@ -29,7 +28,7 @@
          blocks blocks
          file file]
     (if (seq file)
-      (if (= (first blocks) \.)
+      (if (= (first blocks) :free)
         (recur (conj ret (first file))
                (next blocks)
                (next file))
@@ -38,9 +37,9 @@
                file))
       (into ret blocks))))
 
-(defn find-next-idx-with-free-space [disk i]
+(defn find-next-block-with-free-space [disk i]
   (reduce (fn [acc n]
-            (if (some #{\.} (nth disk n))
+            (if (some #{:free} (nth disk n))
               (reduced n)
               acc))
           i
@@ -52,7 +51,7 @@
 
 (let [disk (parse-input input)]
   (->> (loop [ret disk
-              i (find-next-idx-with-free-space ret 0)
+              i (find-next-block-with-free-space ret 0)
               j (dec (count disk))]
          (let [current (nth ret i)
                target  (nth ret j)
@@ -61,21 +60,21 @@
              (<= j i) ret
 
              file?
-             (let [free-space (aoc/cnt current \.)
-                   size       (count target)]
-               (if (<= size free-space)
+             (let [free-space-size (aoc/cnt current :free)
+                   file-size       (count target)]
+               (if (<= file-size free-space-size)
                  (let [ret' (assoc ret
                                    i (place-file current target)
-                                   j (span size))]
+                                   j (free-space file-size))]
                    (recur ret'
-                          (find-next-idx-with-free-space ret' i)
+                          (find-next-block-with-free-space ret' i)
                           (dec j)))
-                 (let [[p1 p2] (split-file target free-space)
+                 (let [[p1 p2] (split-file target free-space-size)
                        ret' (assoc ret
                                    i (place-file current p1)
                                    j p2)]
                    (recur ret'
-                          (find-next-idx-with-free-space ret' i)
+                          (find-next-block-with-free-space ret' i)
                           j))))
 
              :else
@@ -89,7 +88,7 @@
     (let [current (nth disk i)]
       (cond 
         (<= j i) nil
-        (<= size (aoc/cnt current \.)) [i (place-file current file)]
+        (<= size (aoc/cnt current :free)) [i (place-file current file)]
         :else (recur (inc i))))))
 
 (let [disk (parse-input input)]
@@ -108,9 +107,9 @@
              (if-let [[k chunk] (move-file ret target size i j)]
                (let [ret' (assoc ret
                                  k chunk
-                                 j (vec (repeat size \.)))]
+                                 j (free-space size))]
                  (recur ret'
-                        (find-next-idx-with-free-space ret' i)
+                        (find-next-block-with-free-space ret' i)
                         (dec j)
                         failed?))
                (recur ret i (dec j) (conj failed? size)))

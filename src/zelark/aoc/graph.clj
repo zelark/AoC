@@ -13,3 +13,26 @@
                               (get dist [k j] ##Inf)))))
              init
              (for [k (keys g), i (keys g), j (keys g)] [k i j])))))
+
+(defn- bfs-seq
+  ([neighbors start]
+   (bfs-seq neighbors (conj PersistentQueue/EMPTY [start]) #{start}))
+  ([neighbors queue seen]
+   (when-let [current (peek queue)]
+     (cons current
+           (lazy-seq
+            (let [[queue seen]
+                  (->> (neighbors (peek current))
+                       (reduce (fn [[q s] node]
+                                 (if (seen node)
+                                   [q s]
+                                   [(conj q (conj current node)) (conj s node)]))
+                               [(pop queue) seen]))]
+              (bfs-seq neighbors queue seen)))))))
+
+(defn bfs
+  ([g start] (bfs-seq g start))
+  ([g start goal]
+   (let [goal? (if (or (fn? goal) (set? goal)) goal #{goal})]
+     (first (filter #(goal? (peek %)) (bfs-seq g start))))))
+

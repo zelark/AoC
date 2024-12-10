@@ -8,14 +8,14 @@
 
 (def input (aoc/get-input 2024 10))
 
-(def ^:const lowest 0)
-(def ^:const highest 9)
+(def lowest? zero?)
+(def highest? #{9})
 
 (defn parse-input [input]
   (g2/parse input identity aoc/ch->digit))
 
 (defn find-trailheads [grid]
-  (keys (filter (fn [[_ v]] (= v lowest)) grid)))
+  (keys (filter (fn [[_ v]] (lowest? v)) grid)))
 
 (defn moves [grid from]
   (for [to (g2/neighbors from)
@@ -24,7 +24,7 @@
 
 (defn trailhead-score [grid loc]
   (->> (g/bfs #(moves grid %) loc)
-       (filter #(= (grid (peek %)) highest))
+       (filter #(highest? (grid (peek %))))
        (count)))
 
 (defn solve [part input]
@@ -46,7 +46,7 @@
 
 (defn trailhead-rating [grid loc]
   (->> (seacrh #(moves grid %) [[loc]])
-       (filter #(= (grid (peek %)) highest))
+       (filter #(highest? (grid (peek %))))
        (count)))
 
 (solve trailhead-rating input) ; 1058

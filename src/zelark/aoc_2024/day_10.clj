@@ -12,14 +12,14 @@
 (def ^:const highest 9)
 
 (defn parse-input [input]
-  (g2/parse input (g2/any-but g2/empty-space) aoc/ch->digit))
+  (g2/parse input identity aoc/ch->digit))
 
 (defn find-trailheads [grid]
   (keys (filter (fn [[_ v]] (= v lowest)) grid)))
 
 (defn moves [grid from]
   (for [to (g2/neighbors from)
-        :when (aoc/one? (- (grid to 100) (grid from)))]
+        :when (= (inc (grid from)) (grid to))]
     to))
 
 (defn trailhead-score [grid loc]

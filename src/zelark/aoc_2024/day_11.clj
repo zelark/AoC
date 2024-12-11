@@ -10,32 +10,27 @@
 (defn parse-input [input]
   (aoc/parse-longs input))
 
-(defn len [n]
-  (inc (int (math/log10 n))))
-
 (defn split-stone [stone]
-  (let [length  (len stone)
+  (let [length  (aoc/nlen stone)
         half    (quot length 2)
         divisor (int (math/pow 10 half))]
     [(quot stone divisor)
      (mod stone divisor)]))
 
 (defn blink [stones]
-  (reduce-kv (fn [m stone n]
-               (cond
-                 (zero? stone)
-                 (update m 1 (fnil + 0) n)
+  (let [add-stones #(update %1 %2 (fnil + 0) %3)]
+    (reduce-kv (fn [m stone num]
+                 (cond
+                   (zero? stone)
+                   (add-stones m 1 num)
 
-                 (even? (len stone))
-                 (let [[st1 st2] (split-stone stone)]
-                   (-> m
-                       (update st1 (fnil + 0) n)
-                       (update st2 (fnil + 0) n)))
+                   (even? (aoc/nlen stone))
+                   (reduce #(add-stones %1 %2 num) m (split-stone stone))
 
-                 :else
-                 (update m (* stone 2024) (fnil + 0) n)))
-             {}
-             stones))
+                   :else
+                   (add-stones m (* stone 2024) num)))
+               {}
+               stones)))
 
 (defn solve [input n]
   (->> (parse-input input)

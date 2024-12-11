@@ -4,7 +4,8 @@
             [clojure.string :as str]
             [clojure.java.shell :as shell]
             [clojure.edn :as edn]
-            [clojure.data.priority-map :refer [priority-map-keyfn]])
+            [clojure.data.priority-map :refer [priority-map-keyfn]]
+            [clojure.math :as math])
   (:import [clojure.lang PersistentQueue]))
 
 (set! *warn-on-reflection* true)
@@ -259,9 +260,6 @@
   (+ (* n 10) d))
 
 (defn nlen
-  ([num] (nlen num 0))
-  ([num n]
-   (let [q (quot num 10)]
-     (if (zero? q)
-       (inc n)
-       (recur q (inc n))))))
+  "Returns number of digits in n."
+  [^Long n]
+  (inc (int (math/log10 n))))

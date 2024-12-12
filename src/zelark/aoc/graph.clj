@@ -1,4 +1,5 @@
-(ns zelark.aoc.graph)
+(ns zelark.aoc.graph
+  (:import [clojure.lang PersistentQueue]))
 
 (defn shortest-paths
   "Floyd–Warshall algorithm"
@@ -36,3 +37,16 @@
    (let [goal? (if (or (fn? goal) (set? goal)) goal #{goal})]
      (first (filter #(goal? (peek %)) (bfs-seq g start))))))
 
+(defn connected-group [neighbors v]
+  (reduce #(conj % (peek %2)) #{} (bfs neighbors v)))
+
+(defn connected-groups
+  ([g] (connected-groups g nil))
+  ([g neighbors]
+   (let [neighbors (or neighbors g)]
+     (reduce (fn [groups v]
+               (if (some #(% v) groups)
+                 groups
+                 (conj groups (connected-group neighbors v))))
+             []
+             (keys g)))))

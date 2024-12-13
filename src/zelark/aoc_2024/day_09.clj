@@ -37,7 +37,7 @@
                file))
       (into ret blocks))))
 
-(defn find-next-block-with-free-space [disk i]
+(defn find-next-chunk-idx-with-free-space [disk i]
   (reduce (fn [acc n]
             (if (some #{:free} (nth disk n))
               (reduced n)
@@ -51,7 +51,7 @@
 
 (let [disk (parse-input input)]
   (->> (loop [ret disk
-              i (find-next-block-with-free-space ret 0)
+              i (find-next-chunk-idx-with-free-space ret 0)
               j (dec (count disk))]
          (let [current (nth ret i)
                target  (nth ret j)
@@ -67,14 +67,14 @@
                                    i (place-file current target)
                                    j (free-space file-size))]
                    (recur ret'
-                          (find-next-block-with-free-space ret' i)
+                          (find-next-chunk-idx-with-free-space ret' i)
                           (dec j)))
                  (let [[p1 p2] (split-file target free-space-size)
                        ret' (assoc ret
                                    i (place-file current p1)
                                    j p2)]
                    (recur ret'
-                          (find-next-block-with-free-space ret' i)
+                          (find-next-chunk-idx-with-free-space ret' i)
                           j))))
 
              :else
@@ -83,12 +83,12 @@
        (calc-checksum))) ; 6279058075753
 
 ;; part 2 (3817.592484 msecs)
-(defn move-file [disk file size i j]
+(defn find-place [disk file-size i j]
   (loop [i i]
-    (let [current (nth disk i)]
+    (let [chunk (nth disk i)]
       (cond 
         (<= j i) nil
-        (<= size (aoc/cnt current :free)) [i (place-file current file)]
+        (<= file-size (aoc/cnt chunk :free)) [i chunk]
         :else (recur (inc i))))))
 
 (let [disk (parse-input input)]
@@ -104,12 +104,12 @@
 
              (and file?
                   (not (failed? size)))
-             (if-let [[k chunk] (move-file ret target size i j)]
+             (if-let [[k chunk] (find-place ret size i j)]
                (let [ret' (assoc ret
-                                 k chunk
+                                 k (place-file chunk target)
                                  j (free-space size))]
                  (recur ret'
-                        (find-next-block-with-free-space ret' i)
+                        (find-next-chunk-idx-with-free-space ret' i)
                         (dec j)
                         failed?))
                (recur ret i (dec j) (conj failed? size)))

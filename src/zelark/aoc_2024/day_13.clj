@@ -6,17 +6,17 @@
 
 (def input (aoc/get-input 2024 13))
 
-(defn parse-machine [input part2?]
+(defn parse-machine [input correct?]
   (let [[ax ay bx by px py] (aoc/parse-longs input)]
     {:a [ax ay]
      :b [bx by]
-     :p (cond->> [px py] part2? (mapv + [10000000000000 10000000000000]))}))
+     :p (cond->> [px py] correct? (mapv + [10000000000000 10000000000000]))}))
 
-(defn parse-input [input part2?]
+(defn parse-input [input correct?]
   (->> (aoc/split-on-blankline input)
-       (map #(parse-machine % part2?))))
+       (map #(parse-machine % correct?))))
 
-(defn win-prize [machine]
+(defn presses [machine]
   (let [[ax ay] (get machine :a)
         [bx by] (get machine :b)
         [px py] (get machine :p)
@@ -27,7 +27,7 @@
 
 (defn solve [part input]
   (->> (parse-input input (= part :p2))
-       (map win-prize)
+       (map presses)
        (filter (comp (complement ratio?) first))
        (aoc/sum (fn [[a b]] (+ (* 3 a) b)))))
 

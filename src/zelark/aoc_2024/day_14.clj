@@ -56,6 +56,19 @@
      (take-while (complement easter-egg?))
      (count)) ; 7132
 
+;; Another approach — slower but more reliable.
+;; It takes into account a safety factor.
+(->> (parse-input input)
+     (iterate step)
+     (map-indexed vector)
+     (reduce (fn [seen [idx state]]
+               (if (seen state)
+                 (reduced seen)
+                 (assoc seen state idx)))
+             {})
+     (apply min-key (comp safety-factor key))
+     (val))
+
 ;; bonus: draw a picture of the Christmas tree
 (->> (parse-input input)
      (iterate step)

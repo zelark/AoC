@@ -40,16 +40,15 @@
   (let [new-loc (g2/plus loc dir)
         tile    (wh new-loc)]
     (cond
-      (wall? tile)
-      nil
-      
+      (wall? tile) nil
+
       (g2/empty-space? tile)
       (assoc wh
              loc     prev
-             new-loc \O)
-      
-      (box? \O)
-      (recur (assoc wh loc prev) new-loc \O dir))))
+             new-loc (wh loc))
+
+      (box? tile)
+      (recur (assoc wh loc prev) new-loc (wh loc) dir))))
 
 (defn step [{:keys [wh robot] :as state} move]
   (let [dir     (directions move)
@@ -74,20 +73,6 @@
                         movements))) ; 1383666
 
 ;; part 2 (62.738664 msecs)
-(defn move-boxes-h [wh loc prev dir]
-  (let [new-loc (g2/plus loc dir)
-        tile    (wh new-loc)]
-    (cond
-      (wall? tile) nil
-      
-      (g2/empty-space? tile)
-      (assoc wh
-             loc     prev
-             new-loc (wh loc))
-
-      (box? tile)
-      (recur (assoc wh loc prev) new-loc (wh loc) dir))))
-
 (defn place-tiles [wh locs tiles]
   (->> (map vector locs tiles)
        (reduce (fn [w [loc tile]] (assoc w loc tile)) wh)))
@@ -143,7 +128,7 @@
       (assoc state :robot new-loc)
 
       (and (box? tile) (#{g2/left g2/right} dir))
-      (if-let [wh' (move-boxes-h wh new-loc g2/empty-space dir)]
+      (if-let [wh' (move-boxes wh new-loc g2/empty-space dir)]
         {:wh wh' :robot new-loc}
         state)
 

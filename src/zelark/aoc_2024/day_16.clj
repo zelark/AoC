@@ -26,12 +26,12 @@
             current      (peek path)]
         (if (goal? current)
           (if (<= score min-score)
-            (recur seen (pop queue) score (into best-points (map first path)))
+            (recur seen (pop queue) score (into best-points (map first) path))
             (count best-points))
           (let [seen'  (assoc seen current score)
                 queue' (reduce (fn [q target]
                                  (let [score' (+ score (dist current target))]
-                                   (if (< (seen target Long/MAX_VALUE) score')
+                                   (if (<= (seen target Long/MAX_VALUE) score')
                                      q
                                      (assoc q (conj path target) score'))))
                                (pop queue)
@@ -41,23 +41,25 @@
 
 (defn neighbours [maze]
   (fn [[loc dir]]
-    (let [new-loc (g2/plus loc dir)]
-      (cond-> [[loc (g2/turn :right dir)]
-               [loc (g2/turn :left dir)]]
-        (nil? (maze new-loc)) (conj [new-loc dir])))))
+    (let [east (g2/turn :right dir)
+          west (g2/turn :left dir)]
+      (->> [[(g2/plus loc east) east]
+            [(g2/plus loc west) west]
+            [(g2/plus loc dir)  dir]]
+           (remove #(-> % first maze))))))
 
 (defn solve [part input]
   (let [{:keys [start end maze]} (parse-input input)
         start [start g2/right]
         goal? #(= (first %) end)
-        dist  (fn [[_ d1] [_ d2]] (if (= d1 d2) 1 1000))
+        cost  (fn [[_ d1] [_ d2]] (if (= d1 d2) 1 1001))
         h     (constantly 1)]
     (if (= part :p2)
-      (best-spots (neighbours maze) dist start goal?)
-      (aoc/astar (neighbours maze) dist h start goal? {:score? true}))))
+      (best-spots (neighbours maze) cost start goal?)
+      (aoc/astar (neighbours maze) cost h start goal? {:score? true}))))
 
-;; part 1 (281.778804 msecs)
+;; part 1 (135.739326 msecs)
 (solve :p1 input) ; 147628
 
-;; part 2 (2678.855028 msecs)
+;; part 2 (962.489275 msecs)
 (solve :p2 input) ; 670

@@ -28,25 +28,23 @@
           (if (<= score min-score)
             (recur seen (pop queue) score (into best-points (map first path)))
             (count best-points))
-          (if (< (seen current Long/MAX_VALUE) score)
-            (recur seen (pop queue) min-score best-points)
-            (let [seen'  (assoc seen current score)
-                  queue' (reduce (fn [q target]
-                                   (assoc q
-                                          (conj path target)
-                                          (+ score (dist current target))))
-                                 (pop queue)
-                                 (graph current))]
-              (recur seen' queue' min-score best-points)))))
+          (let [seen'  (assoc seen current score)
+                queue' (reduce (fn [q target]
+                                 (let [score' (+ score (dist current target))]
+                                   (if (< (seen target Long/MAX_VALUE) score')
+                                     q
+                                     (assoc q (conj path target) score'))))
+                               (pop queue)
+                               (graph current))]
+            (recur seen' queue' min-score best-points))))
       (count best-points))))
 
 (defn neighbours [maze]
   (fn [[loc dir]]
     (let [new-loc (g2/plus loc dir)]
-      (cond-> []
-        (nil? (maze new-loc)) (conj [new-loc dir])
-        :turn-right (conj [loc (g2/turn :right dir)])
-        :turn-left  (conj [loc (g2/turn :left dir)])))))
+      (cond-> [[loc (g2/turn :right dir)]
+               [loc (g2/turn :left dir)]]
+        (nil? (maze new-loc)) (conj [new-loc dir])))))
 
 (defn solve [part input]
   (let [{:keys [start end maze]} (parse-input input)
@@ -61,5 +59,5 @@
 ;; part 1 (281.778804 msecs)
 (solve :p1 input) ; 147628
 
-;; part 2 (6120.481336 msecs)
+;; part 2 (2678.855028 msecs)
 (solve :p2 input) ; 670

@@ -13,30 +13,27 @@
   (->> (str/split-lines input)
        (map aoc/parse-longs)))
 
-;; part 1 (22.928986 msecs)
-(time (let [bytes      (zipmap (take 1024 (parse-input input))
-                               (repeat \#))
-            boundaries [[0 0] [70 70]]
-            neighbors (fn [loc]
-                        (->> (g2/neighbors loc)
-                             (filter #(g2/in-bounds? boundaries %))
-                             (remove bytes)))
-            steps (g/bfs neighbors [0 0] [70 70])]
-        (dec (count steps)))) ; 312
+(defn neighbors [boundaries bytes]
+  (fn [loc]
+    (->> (g2/neighbors loc)
+         (filter #(g2/in-bounds? boundaries %))
+         (remove bytes))))
 
+;; part 1 (22.928986 msecs)
+(let [bytes      (zipmap (take 1024 (parse-input input))
+                         (repeat \#))
+      boundaries [[0 0] [70 70]]
+      neighbors  (neighbors boundaries bytes)
+      steps (g/bfs neighbors [0 0] [70 70])]
+  (dec (count steps))) ; 312
 
 ;; part 2 (15475.939353 msecs)
 (time (let [bytes (parse-input input)
             grid  (zipmap (take 1024 bytes) (repeat \#))
-            boundaries [[0 0] [70 70]]
-            neighbors (fn [grid]
-                        (fn [loc]
-                          (->> (g2/neighbors loc)
-                               (filter #(g2/in-bounds? boundaries %))
-                               (remove grid))))]
+            boundaries [[0 0] [70 70]]]
         (->> (reduce (fn [g byte]
                        (let [grid (assoc g byte \#)]
-                         (if (seq (g/bfs (neighbors grid) [0 0] [70 70]))
+                         (if (seq (g/bfs (neighbors boundaries grid) [0 0] [70 70]))
                            grid
                            (reduced byte))))
                      grid

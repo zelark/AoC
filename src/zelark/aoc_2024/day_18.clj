@@ -13,29 +13,28 @@
   (->> (str/split-lines input)
        (map aoc/parse-longs)))
 
-(defn neighbors [boundaries bytes]
+(defn neighbors [boundaries corrupted?]
   (fn [loc]
     (->> (g2/neighbors loc)
          (filter #(g2/in-bounds? boundaries %))
-         (remove bytes))))
+         (remove corrupted?))))
+
+(defn shortest-path [bytes n start end]
+  (let [corrupted? (set (take n bytes))
+        boundaries [start end]]
+    (g/bfs (neighbors boundaries corrupted?) start end)))
+
+(defn solve [part input]
+  (let [bytes     (parse-input input)
+        find-path #(shortest-path bytes % [0 0] [70 70])]
+    (if (= part :p1)
+      (dec (count (find-path 1024)))
+      (->> (aoc/binary-search find-path (count bytes))
+           (nth bytes)
+           (str/join ",")))))
 
 ;; part 1 (22.928986 msecs)
-(let [bytes      (zipmap (take 1024 (parse-input input))
-                         (repeat \#))
-      boundaries [[0 0] [70 70]]
-      neighbors  (neighbors boundaries bytes)
-      steps (g/bfs neighbors [0 0] [70 70])]
-  (dec (count steps))) ; 312
+(solve :p1 input) ; 312
 
-;; part 2 (15475.939353 msecs)
-(time (let [bytes (parse-input input)
-            grid  (zipmap (take 1024 bytes) (repeat \#))
-            boundaries [[0 0] [70 70]]]
-        (->> (reduce (fn [g byte]
-                       (let [grid (assoc g byte \#)]
-                         (if (seq (g/bfs (neighbors boundaries grid) [0 0] [70 70]))
-                           grid
-                           (reduced byte))))
-                     grid
-                     (drop 1024 bytes))
-             (str/join ",")))) ; 28,26
+;; part 2 (52.361474 msecs)
+(solve :p2 input) ; 28,26

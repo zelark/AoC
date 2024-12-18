@@ -177,9 +177,9 @@
 (defn mark-point [grid [x y] v]
   (assoc-in grid [y x] v))
 
-(defn print-points [points]
-  (let [max-x (max first points)
-        max-y (max second points)]
+(defn print-points [points & {:keys [max-x max-y]}]
+  (let [max-x (or max-x (max first points))
+        max-y (or max-y (max second points))]
     (-> (reduce #(mark-point %1 %2 \#)
                 (empty-grid (inc max-x) (inc max-y))
                 points)
@@ -205,6 +205,12 @@
                    grid
                    loc->ch)
         (print-grid))))
+
+(defn print-on-grid
+  ([grid points] (print-on-grid grid points \#))
+  ([grid points ch]
+   (-> (reduce (fn [g loc] (assoc g loc ch)) grid points)
+       (print-points-2))))
 
 (defn manhattan-distance [[^long x1 ^long y1] [^long x2 ^long y2]]
   (+ (abs (- x2 x1)) (abs (- y2 y1))))

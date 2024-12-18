@@ -214,7 +214,12 @@
 ;; search and path finding
 
 ;; https://en.wikipedia.org/wiki/Binary_search#Alternative_procedure
-(defn binary-search [pred n]
+(defn binary-search
+  "Does binary search.
+
+  If pred returns `true`, rejects left side.
+  Otherwise, rejects right side."
+  [pred n]
   (->> [0 (dec n)]
        (iterate (fn [[l r]]
                   (let [m (inc (quot (+ l r) 2))]

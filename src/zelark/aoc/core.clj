@@ -221,17 +221,25 @@
 
 ;; https://en.wikipedia.org/wiki/Binary_search#Alternative_procedure
 (defn binary-search
-  "Does binary search.
+  "Performs a binary search without check.
 
-  If pred returns `true`, rejects left side.
-  Otherwise, rejects right side."
-  [pred n]
-  (->> [0 (dec n)]
-       (iterate (fn [[l r]]
-                  (let [m (inc (quot (+ l r) 2))]
-                    (if (pred m) [m r] [l (dec m)]))))
-       (drop-while (fn [[l r]] (not= l r)))
-       (ffirst)))
+  If pred returns `true`, the left side is rejected.
+  Otherwise, the right side is rejected.
+
+  Returns an element with the found index."
+  [pred coll]
+  (let [n (count coll)]
+    (->> [0 (dec n)]
+         (iterate (fn [[l r]]
+                    (let [m (inc (quot (+ l r) 2))]
+                      (if (pred m) [m r] [l (dec m)]))))
+         (drop-while (fn [[l r]] (not= l r)))
+         (ffirst)
+         (nth coll))))
+
+(comment
+  (let [xs (range 10)] (binary-search #(<= (nth xs %) 2) xs))   ; => 2
+  (let [xs (range 10)] (binary-search #(<= (nth xs %) 20) xs))) ; => 9
 
 (defn- generate-route [node came-from]
   (loop [route ()

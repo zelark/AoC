@@ -29,8 +29,7 @@
         find-path #(shortest-path bytes % [0 0] [70 70])]
     (if (= part :p1)
       (dec (count (find-path 1024)))
-      (->> (aoc/binary-search find-path (count bytes))
-           (nth bytes)
+      (->> (aoc/binary-search find-path bytes)
            (str/join ",")))))
 
 ;; part 1 (22.928986 msecs)

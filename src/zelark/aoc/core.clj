@@ -212,6 +212,16 @@
 (set! *warn-on-reflection* true)
 
 ;; search and path finding
+
+;; https://en.wikipedia.org/wiki/Binary_search#Alternative_procedure
+(defn binary-search [pred n]
+  (->> [0 (dec n)]
+       (iterate (fn [[l r]]
+                  (let [m (inc (quot (+ l r) 2))]
+                    (if (pred m) [m r] [l (dec m)]))))
+       (drop-while (fn [[l r]] (not= l r)))
+       (ffirst)))
+
 (defn- generate-route [node came-from]
   (loop [route ()
          node node]

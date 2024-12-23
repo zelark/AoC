@@ -1,4 +1,5 @@
 (ns zelark.aoc.graph
+  (:require [clojure.set :as set])
   (:import [clojure.lang PersistentQueue]))
 
 (defn shortest-paths
@@ -49,4 +50,46 @@
                  groups
                  (conj groups (connected-group neighbors v))))
              []
-             (keys g)))))
+
+(defn- bk
+  "Performs Bron-Kerbosch algorithm using a pivot vertex.
+
+  Pseudocode:
+  ```
+  algorithm BronKerbosch2(R, P, X) is
+      if P and X are both empty then
+          report R as a maximal clique
+      choose a pivot vertex u in P ⋃ X
+      for each vertex v in P \\ N(u) do
+          BronKerbosch2(R ⋃ {v}, P ⋂ N(v), X ⋂ N(v))
+          P := P \\ {v}
+          X := X ⋃ {v}
+  ```
+  "
+  ([graph]
+   (let [nodes (set (keys graph))]
+     (bk graph #{} nodes #{})))
+  ([grpah r p x]
+   (if (and (empty? p)
+            (empty? x))
+     [r]
+     (let [u (first (set/union p x))]
+       (loop [pwnu (remove (grpah u) p)
+              p    p
+              x    x
+              result []]
+         (if (empty? pwnu)
+           result
+           (let [v      (first pwnu)
+                 result (into result
+                              (bk grpah
+                                  (conj r v)
+                                  (set/intersection p (grpah v))
+                                  (set/intersection x (grpah v))))]
+             (recur (rest pwnu) (disj p v) (conj x v) result))))))))
+
+(defn maximal-cliques
+  "Returns a vector of the maximal cliques using Bron-Kerbosch."
+  [graph]
+  (bk graph))
+

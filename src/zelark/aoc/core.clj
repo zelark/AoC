@@ -61,8 +61,9 @@
 (defn parse-bin [s]
   (Long/parseLong s 2))
 
-(defn split-on-blankline [input]
-  (str/split input #"\R\R"))
+(defn split-on-blankline [input & {:keys [split-lines?]}]
+  (cond->> (str/split input #"\R\R")
+    split-lines? (mapv str/split-lines)))
 
 (defn parse-asm-code [input]
   (->> (str/split-lines input)

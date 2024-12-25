@@ -28,4 +28,4 @@
             key   keys
             :when (fit? lock key)]
         1)
-      (aoc/sum)))
+      (aoc/sum))) ; 3133
